@@ -1,11 +1,12 @@
+#define AC_R2V6_DEBUG true
 #include <Arduino.h>
-#include "functions/storage.h"
-#include "functions/light.h"
+#include "functions/debug.h"
+#include "classes/Matrix.hpp"
 #include "classes/Touchpad.hpp"
 #include "classes/AC_Rtc.hpp"
-
-#define AC_R2V6_DEBUG true
-#include "functions/debug.h"
+#include "functions/storage.h"
+#include "functions/light.h"
+#include "functions/AC_time.h"
 
 
 Property<uint8_t> a1_h;
@@ -20,6 +21,8 @@ Property<uint8_t> a2_s;
 Property<uint8_t> a2_a;
 Property<uint8_t> pVol;
 Property<uint8_t> lDur;
+Property<float> lightValue;
+Property<DateTime> now;
 const std::map<const char *, Property<uint8_t> *> properties = {
         {"a1_h", &a1_h},
         {"a1_m", &a1_m},
@@ -36,17 +39,27 @@ const std::map<const char *, Property<uint8_t> *> properties = {
 };
 
 __attribute__((used)) void setup() {
-    debug::init();
-    debug::print("Setup start");
+    DEBUG_INIT();
+    for (uint8_t i = 0; i < 5; ++i) {
+        delay(500);
+        Serial.print('.');
+    }
+    DEBUG_SIMPLE("Setup start");
 
     Touchpad::init();
     storage::init("ACr2v2", &properties);
 
     AC_RTC::init();
+    Matrix::init(lightValue, now);
 
-    debug::print("Setup end");
+    DEBUG_SIMPLE("Setup end");
 }
 
 __attribute__((used)) void loop() {
     // loop
+    lightValue.set(light::read());
+    now.set(ac_time::now());
+    auto touched = Touchpad::read();
+    if (touched) Matrix::illuminate();
+    Matrix::updateIllumination();
 }

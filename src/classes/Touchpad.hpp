@@ -11,15 +11,18 @@
 #include "functions/util.h"
 
 
+/**
+ * @brief Implements the reading off the AlarmClock's five different touchpads
+ */
 class Touchpad {
 
-    static constexpr uint8_t NUM_READINGS{5};
-    static constexpr double PRECISION{0.8};
+    static constexpr uint8_t NUM_READINGS = 5;
+    static constexpr double PRECISION = 0.7;
     static std::array<Touchpad, 5> pads;
 
     const uint8_t pin;
     std::array<uint16_t, NUM_READINGS> readings{};
-    uint16_t value{};
+    uint16_t thresholdValue{};
 
     explicit Touchpad(uint8_t pin) : pin(pin) {};
     void init0();
@@ -35,8 +38,6 @@ public:
 
     static void init();
     static Touchpad *read();
-
-    inline bool operator==(Touchpad pad) const { return pin == pad.pin; }
 
     inline bool operator==(Touchpad const *pad) const { return pad && pin == pad->pin; }
 
@@ -76,21 +77,27 @@ Touchpad *Touchpad::read() {
 
 void Touchpad::init0() {
     uint16_t readValue;
-    while ((readValue = touchRead(pin)) == 0);
-    readings.fill(readValue);
-    value = util::average<uint16_t, NUM_READINGS>(readings);
+    for (int i = 0; i < NUM_READINGS; ++i) {
+        while ((readValue = touchRead(pin)) == 0);
+        readings[i] = readValue;
+    }
+    thresholdValue = util::average<uint16_t, NUM_READINGS>(readings);
+
+    DEBUG("Touchpad initialized: ", pin);
+    DEBUG("Threshold value: ", thresholdValue);
 }
 
 bool Touchpad::read0() {
+    uint16_t readValue;
     for (int i = 0; i < NUM_READINGS; ++i) {
-        uint16_t readValue;
         while ((readValue = touchRead(pin)) == 0);
         readings[i] = readValue;
     }
 
-    auto averageReading = util::average<uint16_t, NUM_READINGS>(readings);
-    if (averageReading < (uint16_t) ((double) value * PRECISION)) return true;
-    value = averageReading;
+    readValue = util::average<uint16_t, NUM_READINGS>(readings);
+    if (readValue < (uint16_t) ((double) thresholdValue * PRECISION)) return true;
+
+    thresholdValue = readValue;
     return false;
 }
 
