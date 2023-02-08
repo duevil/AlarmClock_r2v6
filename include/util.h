@@ -6,7 +6,11 @@
 #define ALARM_CLOCK_R2V6_UTIL_H
 
 #include <array>
+#include <numeric>
 
+/**
+ * General purpose utility methods
+ */
 namespace util {
 
     template<typename T, uint8_t size>
