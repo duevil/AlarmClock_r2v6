@@ -10,7 +10,7 @@
 namespace util {
 
     template<typename T, uint8_t size>
-    __attribute__((always_inline)) inline T average(const std::array<T, size> &readings) {
+    inline T average(const std::array<T, size> &readings) {
         return (T) (std::accumulate(readings.begin(), readings.end(), 0.0) / (double) size);
     }
 
