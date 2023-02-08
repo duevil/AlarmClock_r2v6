@@ -3,7 +3,6 @@
 #include <Arduino.h>
 #include <ACr2v6.h>
 
-
 Property<uint8_t> a1_h;
 Property<uint8_t> a1_m;
 Property<uint8_t> a1_r;
@@ -18,8 +17,7 @@ Property<uint8_t> pVol;
 Property<uint8_t> lDur;
 Property<float> lightValue;
 Property<DateTime> now;
-LightS<15> lightS;
-const std::map<const char *, Property<uint8_t> const &> properties = {
+const std::map<const char *const, Property<uint8_t> const &> properties = {
         {"a1_h", a1_h},
         {"a1_m", a1_m},
         {"a1_r", a1_r},
@@ -34,12 +32,12 @@ const std::map<const char *, Property<uint8_t> const &> properties = {
         {"onTm", lDur},
 };
 
-__attribute__((used)) void setup() {
+void setup() {
     DEBUG_INIT();
-    for (uint8_t i = 0; i < 5 && Serial.print('.'); ++i) delay(500);
+    DEBUG_DELAY(); // startup delay to avoid rapid reboots on system failures
     DEBUG_SIMPLE("Setup start");
 
-    Storage::init("ACr2v2", properties);
+    Storage::init(properties);
     AC_RTC::init();
     Touchpad::init();
     LightSensor::init();
@@ -48,7 +46,7 @@ __attribute__((used)) void setup() {
     DEBUG_SIMPLE("Setup end");
 }
 
-__attribute__((used)) void loop() {
+void loop() {
     // loop
     auto value = LightSensor::read();
     auto nowDT = ac_time::now();
@@ -60,6 +58,4 @@ __attribute__((used)) void loop() {
         Matrix::illuminate();
         DEBUG("Touched pad: ", touched->toString());
     }
-
-    Matrix::updateIllumination();
 }

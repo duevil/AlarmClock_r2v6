@@ -7,10 +7,11 @@
 
 /* Often used dependencies */
 #include <Arduino.h>
-#include <debug.h>
 #include <RTClib.h>
 #include <ArduinoJson.h>
+#include <debug.h>
 /* Library classes and headers */
+#include "ACr2v6/Constants.h"
 #include "ACr2v6/util.h"
 #include "ACr2v6/Property.hpp"
 #include "ACr2v6/Matrix/Matrix.hpp"

@@ -6,6 +6,7 @@
 #define ALARM_CLOCK_R2V6_TOUCHPAD_H
 
 #include <array>
+#include <vector>
 #include <algorithm>
 
 
@@ -49,23 +50,22 @@ public:
 
     inline bool operator==(Touchpad const *pad) const { return pad && pin == pad->pin; }
 
-    const char* toString() const {
-        if (MID == this) return "MID";
-        if (LEFT == this) return "LEFT";
-        if (RIGHT == this) return "RIGHT";
-        if (UP == this) return "UP";
-        if (DOWN == this) return "DOWN";
+    const char *toString() const {
+        if (MID == this) return __STRING(MID);
+        if (LEFT == this) return __STRING(LEFT);
+        if (RIGHT == this) return __STRING(RIGHT);
+        if (UP == this) return __STRING(UP);
+        if (DOWN == this) return __STRING(DOWN);
+        return "THIS MUST NOT BE REACHED";
     }
 
 private:
 
-    static constexpr uint8_t NUM_READINGS = 5;
-    static constexpr double PRECISION = 0.65;
-    static const std::array<Touchpad*, 5> pads;
+    static const std::vector<Touchpad *> pads;
     static bool _init;
 
     const uint8_t pin;
-    std::array<uint16_t, NUM_READINGS> readings{};
+    std::array<uint16_t, acc::TOUCHPAD_READINGS> readings{};
     uint16_t thresholdValue{};
 
     explicit Touchpad(uint8_t pin) : pin(pin) {};
@@ -74,11 +74,11 @@ private:
         assert(!_init);
 
         uint16_t readValue;
-        for (int i = 0; i < NUM_READINGS; ++i) {
+        for (int i = 0; i < acc::TOUCHPAD_READINGS; ++i) {
             while ((readValue = touchRead(pin)) == 0);
             readings[i] = readValue;
         }
-        thresholdValue = util::average<uint16_t, NUM_READINGS>(readings);
+        thresholdValue = util::average<uint16_t, acc::TOUCHPAD_READINGS>(readings);
 
         DEBUG("Touchpad initialized: ", pin);
         DEBUG("Threshold value: ", thresholdValue);
@@ -88,13 +88,13 @@ private:
         assert(_init);
 
         uint16_t readValue;
-        for (int i = 0; i < NUM_READINGS; ++i) {
+        for (int i = 0; i < acc::TOUCHPAD_READINGS; ++i) {
             while ((readValue = touchRead(pin)) == 0);
             readings[i] = readValue;
         }
 
-        readValue = util::average<uint16_t, NUM_READINGS>(readings);
-        if (readValue < (uint16_t) ((double) thresholdValue * PRECISION)) return true;
+        readValue = util::average<uint16_t, acc::TOUCHPAD_READINGS>(readings);
+        if (readValue < (uint16_t) ((float) thresholdValue * acc::TOUCHPAD_PRECISION)) return true;
 
         thresholdValue = readValue;
         return false;
@@ -102,13 +102,13 @@ private:
 
 };
 
-Touchpad Touchpad::MID{12};
-Touchpad Touchpad::LEFT{14};
-Touchpad Touchpad::RIGHT{27};
-Touchpad Touchpad::UP{32};
-Touchpad Touchpad::DOWN{33};
+Touchpad Touchpad::MID{acc::TOUCHPAD_PIN_MID};
+Touchpad Touchpad::LEFT{acc::TOUCHPAD_PIN_LEFT};
+Touchpad Touchpad::RIGHT{acc::TOUCHPAD_PIN_RIGHT};
+Touchpad Touchpad::UP{acc::TOUCHPAD_PIN_UP};
+Touchpad Touchpad::DOWN{acc::TOUCHPAD_PIN_DOWN};
 bool Touchpad::_init = false;
-const std::array<Touchpad*, 5> Touchpad::pads{&MID, &LEFT, &RIGHT, &UP, &DOWN};
+const std::vector<Touchpad *> Touchpad::pads{&MID, &LEFT, &RIGHT, &UP, &DOWN};
 
 
 #endif //ALARM_CLOCK_R2V6_TOUCHPAD_H

@@ -5,8 +5,8 @@
 #ifndef ALARM_CLOCK_R2V6_RTC_H
 #define ALARM_CLOCK_R2V6_RTC_H
 
-
 #include "timeAC.h"
+
 
 using AlarmListener = std::function<void(const uint8_t)>;
 
@@ -17,15 +17,17 @@ public:
     static const DateTime OFF;
 
     static void init() {
+        static constexpr uint8_t MAX_OFFSET = 60;
+
         assert(rtc.begin());
         rtc.disable32K();
         rtc.clearAlarm(A1);
         rtc.clearAlarm(A2);
-        pinMode(INTERRUPT_PIN, INPUT_PULLUP);
-        attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), ISR, FALLING);
+        pinMode(acc::RTC_INTERRUPT_PIN, INPUT_PULLUP);
+        attachInterrupt(digitalPinToInterrupt(acc::RTC_INTERRUPT_PIN), ISR, FALLING);
         rtc.writeSqwPinMode(DS3231_OFF);
         DateTime compileDT{__DATE__, __TIME__};
-        if (abs((compileDT - now()).totalseconds()) > 60) set(compileDT);
+        if (abs((compileDT - now()).totalseconds()) > MAX_OFFSET) set(compileDT);
     }
 
     inline static void setAlarm1(const DateTime &dt) { setAlarm(A1, dt); };
@@ -43,7 +45,6 @@ private:
     enum Alarm {
         A1 = 1, A2 = 2
     };
-    static constexpr uint8_t INTERRUPT_PIN = 34;
     static RTC_DS3231 rtc;
     static AlarmListener listener;
 
@@ -59,11 +60,10 @@ private:
     }
 
     static void setAlarm(Alarm alarm, const DateTime &dt) {
-        const auto num = static_cast<const uint8_t>(alarm);
-        rtc.clearAlarm(num);
+        rtc.clearAlarm(alarm);
 
         if (dt == OFF) {
-            rtc.disableAlarm(num);
+            rtc.disableAlarm(alarm);
         } else {
             switch (alarm) {
                 case A1:

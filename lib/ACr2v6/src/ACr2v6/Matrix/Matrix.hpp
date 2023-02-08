@@ -6,21 +6,19 @@
 #define ALARM_CLOCK_R2V6_MATRIX_H
 
 #include <MD_Parola.h>
-#include <string>
 #include "font.h"
 
 
 namespace matrix {
+
     class Matrix {
 
     public:
 
-        static void init(Property<float> &lightProperty,Property<DateTime> &timeProperty) {
-            static constexpr uint8_t CS_PIN = 5;
-            static constexpr uint8_t NUM_DEVICES = 4;
-            static constexpr float FACTOR = 0.2f;
+        static void init(Property<float> &lightProperty, Property<DateTime> &timeProperty) {
             static bool _init = false;
-            static MD_Parola md{MD_MAX72XX::FC16_HW, CS_PIN, NUM_DEVICES};
+            static MD_Parola md{MD_MAX72XX::FC16_HW, acc::MATRIX_CS_PIN, acc::MATRIX_NUM_DEVICES};
+            static uint8_t intensity = 0;
 
             assert(!_init);
 
@@ -44,7 +42,7 @@ namespace matrix {
             });
 
             lightProperty.addListener([](const float, const float lum) {
-                intensity = (uint8_t) (lum * FACTOR);
+                intensity = (uint8_t) (lum * acc::MATRIX_LIGHT_ADJUSTMENT);
                 if (!wasManuallyIlluminated) {
                     illumination.set(intensity > 0);
                     md.setIntensity(intensity);
@@ -64,33 +62,37 @@ namespace matrix {
         }
 
         static void illuminate() {
-            wasManuallyIlluminated = true;
-            manualIlluminationStart = millis();
-            illumination.set(true);
-        }
+            static const auto tmr = xTimerCreate(
+                    "matrix manual illumination",
+                    acc::MATRIX_ILLUMINATION_DURATION / portTICK_PERIOD_MS,
+                    pdFALSE,
+                    nullptr,
+                    [](TimerHandle_t) {
+                        wasManuallyIlluminated = false;
+                        illumination.set(false);
+                    }
+            );
 
-        static void updateIllumination() {
-            if (wasManuallyIlluminated && millis() - manualIlluminationStart > 2000 && intensity == 0) {
-                wasManuallyIlluminated = false;
-                illumination.set(false);
+            if (!illumination.get()) {
+                wasManuallyIlluminated = true;
+                illumination.set(true);
+                xTimerStart(tmr, 0);
             }
         }
 
     private:
 
         static Property<bool> illumination;
-        static uint8_t intensity;
         static bool wasManuallyIlluminated;
-        static uint64_t manualIlluminationStart;
 
     };
+
+    Property<bool> Matrix::illumination{};
+    bool Matrix::wasManuallyIlluminated = false;
+
 }
 
-Property<bool> matrix::Matrix::illumination{};
-uint8_t matrix::Matrix::intensity = 0;
-bool matrix::Matrix::wasManuallyIlluminated = false;
-uint64_t matrix::Matrix::manualIlluminationStart = millis();
-
 using matrix::Matrix;
+
 
 #endif //ALARM_CLOCK_R2V6_MATRIX_H

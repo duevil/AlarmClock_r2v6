@@ -6,7 +6,8 @@
 #define ALARM_CLOCK_R2V6_DEBUG_H
 
 #ifndef NDEBUG
-#define DEBUG_INIT() Serial.begin(115200)
+#define DEBUG_INIT() Serial.begin(SERIAL_BAUD)
+#define DEBUG_DELAY() for (uint8_t i = 0; i < 5 && Serial.print('.'); ++i) delay(500)
 #define DEBUG_SIMPLE(value) do { \
     Serial.printf("DEBUG[%lu] ", millis()); \
     Serial.println(value); \
@@ -22,6 +23,7 @@
 } while (0)
 #else
 #define DEBUG_INIT() ((void)0)
+#define DEBUG_DELAY() ((void)0)
 #define DEBUG_SIMPLE(ignored) ((void)0)
 #define DEBUG(ignored0, ignored1) ((void)0)
 #define ERROR(ignored) ((void)0)

@@ -17,12 +17,12 @@ struct Storage {
     /**
      * @brief Initialises the internal Preferences Storage with the given name and syncs it with the given properties;
      * if a property already exists in the Storage, it's value will be loaded, else if will be newly assigned
-     * @param name The name of the Preferences partition
      * @param properties The properties which will be synced
      */
-    static void init(const char *name, std::map<const char *, Property<uint8_t> const &> const &properties) {
+    static void init(std::map<const char *const, Property<uint8_t> const &> const &properties) {
         static Preferences preferences;
-        assert(preferences.begin(name));
+
+        assert(preferences.begin(acc::PREFERENCES_NAME));
 
         for (auto const &item: properties) {
 
