@@ -15,7 +15,7 @@ public:
     static const DateTime OFF;
 
     static void init() {
-        static constexpr uint8_t MAX_OFFSET = 60;
+        static constexpr uint8_t MAX_OFFSET{60};
 
         assert(rtc.begin());
         rtc.disable32K();

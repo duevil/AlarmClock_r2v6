@@ -5,7 +5,6 @@
 #ifndef ALARM_CLOCK_R2V6_PROPERTY_H
 #define ALARM_CLOCK_R2V6_PROPERTY_H
 
-#include <string>
 #include <vector>
 #include <functional>
 
@@ -23,15 +22,16 @@ class Property {
 public:
 
     Property() = default;
+    virtual ~Property() = delete;
     Property(const Property<T> &) = delete;
-    Property& operator=(const Property<T> &) = delete;
+    Property &operator=(const Property<T> &) = delete;
 
     /**
      * @brief Set the value of the property
      * and, if and only if the new value is unequal to the old value, calls all attached listeners
      * @param value The new value of the property
      */
-    void set(T value) {
+    virtual void set(T value) {
         if (val != value) {
             for (const auto &listener: listeners) {
                 listener(val, value);

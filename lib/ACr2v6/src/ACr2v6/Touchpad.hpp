@@ -25,14 +25,19 @@ public:
 
     static void init() {
         assert(!_init);
+        DEBUG_SIMPLE("Touchpad initialization start");
+
         for (auto &pad: pads) pad->init0();
+
         _init = true;
+        DEBUG_SIMPLE("Touchpad initialization end");
     }
 
     static Touchpad *read() {
         assert(_init);
-        static bool isPressed = false;
-        Touchpad *pressedPad = nullptr;
+
+        static bool isPressed{false};
+        Touchpad *pressedPad{nullptr};
         for (auto &pad: pads) {
             if (pad->read0()) {
                 pressedPad = pad;
@@ -49,7 +54,7 @@ public:
     }
 
     Touchpad(const Touchpad &) = delete;
-    Touchpad& operator=(const Touchpad &) = delete;
+    Touchpad &operator=(const Touchpad &) = delete;
 
     inline bool operator==(Touchpad const *pad) const { return pad && pin == pad->pin; }
 
@@ -79,7 +84,7 @@ private:
         assert(!_init);
 
         uint16_t readValue;
-        for (int i = 0; i < acc::TOUCHPAD_READINGS; ++i) {
+        for (int i{0}; i < acc::TOUCHPAD_READINGS; ++i) {
             while ((readValue = touchRead(pin)) == 0);
             readings[i] = readValue;
         }
@@ -93,7 +98,7 @@ private:
         assert(_init);
 
         uint16_t readValue;
-        for (int i = 0; i < acc::TOUCHPAD_READINGS; ++i) {
+        for (int i{0}; i < acc::TOUCHPAD_READINGS; ++i) {
             while ((readValue = touchRead(pin)) == 0);
             readings[i] = readValue;
         }
@@ -112,7 +117,7 @@ Touchpad Touchpad::LEFT{acc::TOUCHPAD_PIN_LEFT};
 Touchpad Touchpad::RIGHT{acc::TOUCHPAD_PIN_RIGHT};
 Touchpad Touchpad::UP{acc::TOUCHPAD_PIN_UP};
 Touchpad Touchpad::DOWN{acc::TOUCHPAD_PIN_DOWN};
-bool Touchpad::_init = false;
+bool Touchpad::_init{false};
 const std::vector<Touchpad *> Touchpad::pads{&MID, &LEFT, &RIGHT, &UP, &DOWN};
 
 

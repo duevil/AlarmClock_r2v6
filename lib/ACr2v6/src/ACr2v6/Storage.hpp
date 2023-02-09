@@ -26,20 +26,22 @@ struct Storage {
 
         for (auto const &item: properties) {
 
-            auto key = item.first;
-            auto &property = item.second;
+            auto key{item.first};
+            auto &property{item.second};
 
             // check if the key is already assigned and load that value
             // or create a new assignment
             if (preferences.isKey(key)) {
-                auto value = preferences.getUChar(key);
+                auto value{preferences.getUChar(key)};
                 property.set(value);
             } else {
                 preferences.putUChar(key, property.get());
             }
 
             // add a listener for updating the preferences value
-            property.addListener([&key](uint8_t, uint8_t value) {
+            property.addListener([key](uint8_t, uint8_t value) {
+                DEBUG("Updating preferences: ", key);
+                DEBUG("New value: ", value);
                 preferences.putUChar(key, value);
             });
         }

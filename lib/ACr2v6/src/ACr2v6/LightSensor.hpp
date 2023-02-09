@@ -13,23 +13,27 @@ struct LightSensor {
 
     static void init() {
         assert(!_init);
-        _init = true;
+        DEBUG_SIMPLE("BH1750 initialization start");
+
         sensor.begin(BH1750_TO_GROUND);
         sensor.calibrateTiming();
         sensor.setQuality(BH1750_QUALITY_HIGH2);
         sensor.start();
-        for (int i = 0; i < acc::LIGHT_SENSOR_READINGS; ++i) {
+        for (int i{0}; i < acc::LIGHT_SENSOR_READINGS; ++i) {
             while (!sensor.hasValue(true));
             readings[i] = sensor.getLux();
             sensor.start();
         }
+
+        _init = true;
+        DEBUG_SIMPLE("BH1750 initialization end");
     }
 
     static float read() {
+        assert(_init);
+
         static uint8_t index;
         static float lastValue;
-
-        assert(_init);
 
         if (sensor.hasValue()) {
             readings[index] = sensor.getLux();
@@ -50,7 +54,7 @@ private:
 
 };
 
-bool LightSensor::_init = false;
+bool LightSensor::_init{false};
 hp_BH1750 LightSensor::sensor{};
 std::array<float, acc::LIGHT_SENSOR_READINGS> LightSensor::readings{};
 

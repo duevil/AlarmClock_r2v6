@@ -14,7 +14,6 @@ Property<uint8_t> a2_r;
 Property<uint8_t> a2_s;
 Property<uint8_t> a2_a;
 Property<uint8_t> pVol;
-Property<uint8_t> lDur;
 Property<float> lightValue;
 Property<DateTime> now;
 const std::map<const char *const, Property<uint8_t> &> properties = {
@@ -29,33 +28,48 @@ const std::map<const char *const, Property<uint8_t> &> properties = {
         {"a2_s", a2_s},
         {"a2_a", a2_a},
         {"vol",  pVol},
-        {"onTm", lDur},
+        {"onTm", LEDC::durationProperty},
 };
 
 void setup() {
     DEBUG_INIT();
-    DEBUG_DELAY(); // startup delay to avoid rapid reboots on system failures
     DEBUG_SIMPLE("Setup start");
 
-    Storage::init(properties);
     RTC::init();
     Touchpad::init();
     LightSensor::init();
-    Matrix::init(lightValue, now);
+    Matrix::init(lightValue, now, LEDC::lightProperty);
+    LEDC::init();
+    // needs to be called after all other initializations were done to ensure that
+    // all change listeners will be getting notified of possible changes during loading
+    Storage::init(properties);
+
+#ifndef NDEBUG
+    for (const auto &item: properties) {
+        char msg[10];
+        strcpy(msg, item.first);
+        strcat(msg, ": ");
+        DEBUG(msg, item.second.get());
+    }
+#endif
 
     DEBUG_SIMPLE("Setup end");
 }
 
 void loop() {
     // loop
-    auto value = LightSensor::read();
-    auto nowDT = ac_time::now();
-    auto touched = Touchpad::read();
+    auto value{LightSensor::read()};
+    auto nowDT{ac_time::now()};
+    auto touched{Touchpad::read()};
 
     lightValue.set(value);
     now.set(nowDT);
+
     if (touched) {
-        Matrix::illuminate();
+        if (Matrix::isIlluminated()) {
+            if (Touchpad::UP == touched) ++LEDC::lightProperty;
+            else if (Touchpad::DOWN == touched) --LEDC::lightProperty;
+        } else Matrix::illuminate();
         DEBUG("Touched pad: ", touched->toString());
     }
 }

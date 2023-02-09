@@ -20,5 +20,6 @@
 #include "ACr2v6/Touchpad.hpp"
 #include "ACr2v6/Storage.hpp"
 #include "ACr2v6/LightSensor.hpp"
+#include "ACr2v6/LEDC.hpp"
 
 #endif //ALARM_CLOCK_R2V6_H
