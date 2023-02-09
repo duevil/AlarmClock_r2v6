@@ -42,7 +42,7 @@ namespace matrix {
             });
 
             lightProperty.addListener([](const float, const float lum) {
-                intensity = (uint8_t) (lum * acc::MATRIX_LIGHT_ADJUSTMENT);
+                intensity = getIntensity(lum);
                 if (!wasManuallyIlluminated) {
                     illumination.set(intensity > 0);
                     md.setIntensity(intensity);
@@ -64,7 +64,7 @@ namespace matrix {
         static void illuminate() {
             static const auto tmr = xTimerCreate(
                     "matrix manual illumination",
-                    acc::MATRIX_ILLUMINATION_DURATION / portTICK_PERIOD_MS,
+                    acc::MATRIX_ILLUMINATION_DURATION,
                     pdFALSE,
                     nullptr,
                     [](TimerHandle_t) {
@@ -84,6 +84,10 @@ namespace matrix {
 
         static Property<bool> illumination;
         static bool wasManuallyIlluminated;
+
+        static uint8_t getIntensity(const float lum) {
+            return (uint8_t) (lum * acc::MATRIX_LIGHT_ADJUSTMENT);
+        }
 
     };
 

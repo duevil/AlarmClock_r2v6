@@ -19,7 +19,7 @@ struct Storage {
      * if a property already exists in the Storage, it's value will be loaded, else if will be newly assigned
      * @param properties The properties which will be synced
      */
-    static void init(std::map<const char *const, Property<uint8_t> const &> const &properties) {
+    static void init(std::map<const char *const, Property<uint8_t> &> const &properties) {
         static Preferences preferences;
 
         assert(preferences.begin(acc::PREFERENCES_NAME));
@@ -27,7 +27,7 @@ struct Storage {
         for (auto const &item: properties) {
 
             auto key = item.first;
-            auto property = item.second;
+            auto &property = item.second;
 
             // check if the key is already assigned and load that value
             // or create a new assignment
@@ -39,7 +39,7 @@ struct Storage {
             }
 
             // add a listener for updating the preferences value
-            property.addListener([key](uint8_t, uint8_t value) {
+            property.addListener([&key](uint8_t, uint8_t value) {
                 preferences.putUChar(key, value);
             });
         }

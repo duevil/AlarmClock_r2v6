@@ -5,12 +5,10 @@
 #ifndef ALARM_CLOCK_R2V6_RTC_H
 #define ALARM_CLOCK_R2V6_RTC_H
 
-#include "timeAC.h"
 
+using FiredListener = std::function<void(const uint8_t &)>;
 
-using AlarmListener = std::function<void(const uint8_t)>;
-
-class AC_RTC {
+class RTC {
 
 public:
 
@@ -34,19 +32,24 @@ public:
 
     inline static void setAlarm2(const DateTime &dt) { setAlarm(A2, dt); };
 
+    inline static void disableAlarm1() { setAlarm1(OFF); }
+
+    inline static void disableAlarm2() { setAlarm2(OFF); }
+
     inline static DateTime now() { return rtc.now(); }
 
     inline static void set(const DateTime &dt) { rtc.adjust(dt); }
 
-    inline static void onAlarmFired(AlarmListener const &l) { listener = l; };
+    inline static void onAlarmFired(FiredListener const &l) { listener = l; };
 
 private:
 
-    enum Alarm {
+    enum alarm_t {
         A1 = 1, A2 = 2
     };
+
     static RTC_DS3231 rtc;
-    static AlarmListener listener;
+    static FiredListener listener;
 
     static void ISR() {
         if (rtc.alarmFired(A1)) {
@@ -59,7 +62,7 @@ private:
         }
     }
 
-    static void setAlarm(Alarm alarm, const DateTime &dt) {
+    static void setAlarm(alarm_t alarm, const DateTime &dt) {
         rtc.clearAlarm(alarm);
 
         if (dt == OFF) {
@@ -78,14 +81,12 @@ private:
 
 };
 
-/* DEFINITIONS */
-
-const DateTime AC_RTC::OFF{(uint32_t) 0};
-RTC_DS3231 AC_RTC::rtc{};
-AlarmListener AC_RTC::listener{};
+const DateTime RTC::OFF{(uint32_t) 0};
+RTC_DS3231 RTC::rtc{};
+FiredListener RTC::listener{};
 
 
-DateTime ac_time::now() { return AC_RTC::now(); }
+DateTime ac_time::now() { return RTC::now(); }
 
 
 #endif //ALARM_CLOCK_R2V6_RTC_H

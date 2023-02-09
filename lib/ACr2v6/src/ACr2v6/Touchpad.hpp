@@ -48,7 +48,12 @@ public:
         return nullptr;
     }
 
+    Touchpad(const Touchpad &) = delete;
+    Touchpad& operator=(const Touchpad &) = delete;
+
     inline bool operator==(Touchpad const *pad) const { return pad && pin == pad->pin; }
+
+    inline bool operator!=(Touchpad const *pad) const { return (*this == pad); }
 
     const char *toString() const {
         if (MID == this) return __STRING(MID);
@@ -61,14 +66,14 @@ public:
 
 private:
 
+    explicit Touchpad(uint8_t pin) : pin(pin) {};
+
     static const std::vector<Touchpad *> pads;
     static bool _init;
 
     const uint8_t pin;
     std::array<uint16_t, acc::TOUCHPAD_READINGS> readings{};
     uint16_t thresholdValue{};
-
-    explicit Touchpad(uint8_t pin) : pin(pin) {};
 
     void init0() {
         assert(!_init);

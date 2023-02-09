@@ -17,7 +17,7 @@ Property<uint8_t> pVol;
 Property<uint8_t> lDur;
 Property<float> lightValue;
 Property<DateTime> now;
-const std::map<const char *const, Property<uint8_t> const &> properties = {
+const std::map<const char *const, Property<uint8_t> &> properties = {
         {"a1_h", a1_h},
         {"a1_m", a1_m},
         {"a1_r", a1_r},
@@ -38,7 +38,7 @@ void setup() {
     DEBUG_SIMPLE("Setup start");
 
     Storage::init(properties);
-    AC_RTC::init();
+    RTC::init();
     Touchpad::init();
     LightSensor::init();
     Matrix::init(lightValue, now);

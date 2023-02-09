@@ -22,6 +22,10 @@ class Property {
 
 public:
 
+    Property() = default;
+    Property(const Property<T> &) = delete;
+    Property& operator=(const Property<T> &) = delete;
+
     /**
      * @brief Set the value of the property
      * and, if and only if the new value is unequal to the old value, calls all attached listeners
