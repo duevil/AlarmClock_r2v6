@@ -22,7 +22,7 @@ class Property {
 public:
 
     Property() = default;
-    virtual ~Property() = delete;
+    virtual ~Property() = default;
     Property(const Property<T> &) = delete;
     Property &operator=(const Property<T> &) = delete;
 

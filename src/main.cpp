@@ -44,14 +44,14 @@ void setup() {
     // all change listeners will be getting notified of possible changes during loading
     Storage::init(properties);
 
-#ifndef NDEBUG
+#   ifndef NDEBUG
     for (const auto &item: properties) {
         char msg[10];
         strcpy(msg, item.first);
         strcat(msg, ": ");
         DEBUG(msg, item.second.get());
     }
-#endif
+#   endif
 
     DEBUG_SIMPLE("Setup end");
 }
@@ -65,11 +65,22 @@ void loop() {
     lightValue.set(value);
     now.set(nowDT);
 
-    if (touched) {
+    if (touched != Touchpad::pad_t::NONE) {
+        DEBUG("Touched pad: ", Touchpad::toString(touched));
         if (Matrix::isIlluminated()) {
-            if (Touchpad::UP == touched) ++LEDC::lightProperty;
-            else if (Touchpad::DOWN == touched) --LEDC::lightProperty;
+            switch (touched) {
+                case Touchpad::pad_t::MID:
+                case Touchpad::pad_t::LEFT:
+                case Touchpad::pad_t::RIGHT:
+                case Touchpad::pad_t::NONE:
+                    break;
+                case Touchpad::pad_t::UP:
+                    ++LEDC::lightProperty;
+                    break;
+                case Touchpad::pad_t::DOWN:
+                    --LEDC::lightProperty;
+                    break;
+            }
         } else Matrix::illuminate();
-        DEBUG("Touched pad: ", touched->toString());
     }
 }

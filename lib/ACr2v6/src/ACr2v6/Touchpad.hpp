@@ -17,65 +17,82 @@ class Touchpad {
 
 public:
 
-    static Touchpad MID;
-    static Touchpad LEFT;
-    static Touchpad RIGHT;
-    static Touchpad UP;
-    static Touchpad DOWN;
+    enum class pad_t : int8_t {
+        MID = acc::TOUCHPAD_PIN_MID,
+        LEFT = acc::TOUCHPAD_PIN_LEFT,
+        RIGHT = acc::TOUCHPAD_PIN_RIGHT,
+        UP = acc::TOUCHPAD_PIN_UP,
+        DOWN = acc::TOUCHPAD_PIN_DOWN,
+        NONE = -1,
+    };
 
     static void init() {
         assert(!_init);
         DEBUG_SIMPLE("Touchpad initialization start");
 
-        for (auto &pad: pads) pad->init0();
+        for (Touchpad &p: pads) p.init0();
 
         _init = true;
         DEBUG_SIMPLE("Touchpad initialization end");
     }
 
-    static Touchpad *read() {
+    static pad_t read() {
         assert(_init);
 
         static bool isPressed{false};
-        Touchpad *pressedPad{nullptr};
-        for (auto &pad: pads) {
-            if (pad->read0()) {
-                pressedPad = pad;
+        pad_t pressedPad{pad_t::NONE};
+        for (Touchpad &p: pads) {
+            if (p.read0()) {
+                pressedPad = p.pad;
                 break;
             }
         }
-        if (!isPressed && pressedPad != nullptr) {
+        if (!isPressed && pressedPad != pad_t::NONE) {
             isPressed = true;
             return pressedPad;
         }
-        if (isPressed && pressedPad == nullptr) isPressed = false;
+        if (isPressed && pressedPad == pad_t::NONE) isPressed = false;
 
-        return nullptr;
+        return pad_t::NONE;
     }
 
     Touchpad(const Touchpad &) = delete;
     Touchpad &operator=(const Touchpad &) = delete;
 
-    inline bool operator==(Touchpad const *pad) const { return pad && pin == pad->pin; }
+#   ifndef NDEBUG
 
-    inline bool operator!=(Touchpad const *pad) const { return (*this == pad); }
-
-    const char *toString() const {
-        if (MID == this) return __STRING(MID);
-        if (LEFT == this) return __STRING(LEFT);
-        if (RIGHT == this) return __STRING(RIGHT);
-        if (UP == this) return __STRING(UP);
-        if (DOWN == this) return __STRING(DOWN);
-        return "THIS MUST NOT BE REACHED";
+    static const char *toString(pad_t pad) {
+        switch (pad) {
+            case pad_t::MID:
+                return "MID";
+            case pad_t::LEFT:
+                return "LEFT";
+            case pad_t::RIGHT:
+                return "RIGHT";
+            case pad_t::UP:
+                return "UP";
+            case pad_t::DOWN:
+                return "DOWN";
+            case pad_t::NONE:
+                return "NONE";
+        }
     }
+
+#   endif
 
 private:
 
-    explicit Touchpad(uint8_t pin) : pin(pin) {};
+    explicit Touchpad(pad_t pad) : pad(pad), pin(static_cast<const uint8_t>(pad)) { assert(pin > 0); };
 
-    static const std::vector<Touchpad *> pads;
+    static Touchpad P_MID;
+    static Touchpad P_LEFT;
+    static Touchpad P_RIGHT;
+    static Touchpad P_UP;
+    static Touchpad P_DOWN;
+    static const std::vector<std::reference_wrapper<Touchpad>> pads;
     static bool _init;
 
+    const pad_t pad;
     const uint8_t pin;
     std::array<uint16_t, acc::TOUCHPAD_READINGS> readings{};
     uint16_t thresholdValue{};
@@ -112,13 +129,13 @@ private:
 
 };
 
-Touchpad Touchpad::MID{acc::TOUCHPAD_PIN_MID};
-Touchpad Touchpad::LEFT{acc::TOUCHPAD_PIN_LEFT};
-Touchpad Touchpad::RIGHT{acc::TOUCHPAD_PIN_RIGHT};
-Touchpad Touchpad::UP{acc::TOUCHPAD_PIN_UP};
-Touchpad Touchpad::DOWN{acc::TOUCHPAD_PIN_DOWN};
+Touchpad Touchpad::P_MID{pad_t::MID};
+Touchpad Touchpad::P_LEFT{pad_t::LEFT};
+Touchpad Touchpad::P_RIGHT{pad_t::RIGHT};
+Touchpad Touchpad::P_UP{pad_t::UP};
+Touchpad Touchpad::P_DOWN{pad_t::DOWN};
+const std::vector<std::reference_wrapper<Touchpad>> Touchpad::pads{P_MID, P_LEFT, P_RIGHT, P_UP, P_DOWN};
 bool Touchpad::_init{false};
-const std::vector<Touchpad *> Touchpad::pads{&MID, &LEFT, &RIGHT, &UP, &DOWN};
 
 
 #endif //ALARM_CLOCK_R2V6_TOUCHPAD_H
