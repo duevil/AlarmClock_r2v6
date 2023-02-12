@@ -14,18 +14,22 @@ public:
 
         void set(uint8_t value) override { if (value < acc::LIGHT_DUTIES_SIZE) Property::set(value); }
 
-        void operator++() { set(get() < acc::LIGHT_DUTIES_SIZE - 1 ? get() + 1 : 0); }
+        void turnMax() { set(acc::LIGHT_DUTIES[acc::LIGHT_DUTIES_SIZE - 1]); }
 
-        void operator--() { set((get() ? get() : acc::LIGHT_DUTIES_SIZE) - 1); }
+        void turnOff() { set(acc::LIGHT_DUTIES[0]); }
+
+        void operator++() { set((get() + 1) % acc::LIGHT_DUTIES_SIZE); }
+
+        void operator--() { set((acc::LIGHT_DUTIES_SIZE + get() - 1) % acc::LIGHT_DUTIES_SIZE); }
     };
 
     struct DurationProperty : Property<uint8_t> {
 
         void set(uint8_t value) override { if (value < acc::LIGHT_DURATIONS_SIZE) Property::set(value); }
 
-        void operator++() { set(get() < acc::LIGHT_DURATIONS_SIZE - 1 ? get() + 1 : 0); }
+        void operator++() { set((get() + 1) % acc::LIGHT_DURATIONS_SIZE); }
 
-        void operator--() { set((get() ? get() : acc::LIGHT_DURATIONS_SIZE) - 1); }
+        void operator--() { set((acc::LIGHT_DURATIONS_SIZE + get() - 1) % acc::LIGHT_DURATIONS_SIZE); }
 
     };
 

@@ -5,17 +5,15 @@
 #ifndef ALARM_CLOCK_R2V6_RTC_H
 #define ALARM_CLOCK_R2V6_RTC_H
 
-
-using FiredListener = std::function<void(const uint8_t &)>;
-
 class RTC {
 
 public:
 
+    using FiredListener = std::function<void(void)>;
+
     static const DateTime OFF;
 
-    static void init() {
-        static constexpr uint8_t MAX_OFFSET{60};
+    static void init(const FiredListener &a1 = []() {}, const FiredListener &a2 = []() {}) {
 
         assert(rtc.begin());
         rtc.disable32K();
@@ -24,8 +22,8 @@ public:
         pinMode(acc::RTC_INTERRUPT_PIN, INPUT_PULLUP);
         attachInterrupt(digitalPinToInterrupt(acc::RTC_INTERRUPT_PIN), ISR, FALLING);
         rtc.writeSqwPinMode(DS3231_OFF);
-        DateTime compileDT{__DATE__, __TIME__};
-        if (abs((compileDT - now()).totalseconds()) > MAX_OFFSET) set(compileDT);
+        a1Listener = a1;
+        a2Listener = a2;
     }
 
     inline static void setAlarm1(const DateTime &dt) { setAlarm(A1, dt); };
@@ -40,8 +38,6 @@ public:
 
     inline static void set(const DateTime &dt) { rtc.adjust(dt); }
 
-    inline static void onAlarmFired(FiredListener const &l) { listener = l; };
-
 private:
 
     enum alarm_t {
@@ -49,16 +45,17 @@ private:
     };
 
     static RTC_DS3231 rtc;
-    static FiredListener listener;
+    static FiredListener a1Listener;
+    static FiredListener a2Listener;
 
     static void ISR() {
         if (rtc.alarmFired(A1)) {
             rtc.clearAlarm(A1);
-            listener(A1);
+            a1Listener();
         }
         if (rtc.alarmFired(A2)) {
             rtc.clearAlarm(A2);
-            listener(A2);
+            a2Listener();
         }
     }
 
@@ -83,7 +80,8 @@ private:
 
 const DateTime RTC::OFF{(uint32_t) 0};
 RTC_DS3231 RTC::rtc{};
-FiredListener RTC::listener{};
+RTC::FiredListener RTC::a1Listener{};
+RTC::FiredListener RTC::a2Listener{};
 
 
 DateTime ac_time::now() { return RTC::now(); }

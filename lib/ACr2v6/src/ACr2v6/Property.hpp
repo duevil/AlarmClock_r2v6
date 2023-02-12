@@ -9,9 +9,6 @@
 #include <functional>
 
 
-template<typename T>
-using ChangeListener = std::function<void(T, T)>;
-
 /**
  * @brief Simple class for storing an uint_8 value
  * with the functionality of adding change listeners
@@ -20,6 +17,8 @@ template<typename T>
 class Property {
 
 public:
+
+    using ChangeListener = std::function<void(T, T)>;
 
     Property() = default;
     virtual ~Property() = default;
@@ -45,7 +44,7 @@ public:
      * @param listener A function to execute when the value of the property changes
      * @warning Listeners, once attached, can not be removed
      */
-    void addListener(ChangeListener<T> const &listener) {
+    void addListener(ChangeListener const &listener) {
         listeners.push_back(listener);
     }
 
@@ -59,7 +58,7 @@ public:
 private:
 
     T val{};
-    std::vector<ChangeListener<T>> listeners{};
+    std::vector<ChangeListener> listeners{};
 
 };
 

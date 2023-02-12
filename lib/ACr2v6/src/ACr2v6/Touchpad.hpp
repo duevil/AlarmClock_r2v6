@@ -7,7 +7,7 @@
 
 #include <array>
 #include <vector>
-#include <algorithm>
+#include <functional>
 
 
 /**
@@ -23,37 +23,38 @@ public:
         RIGHT = acc::TOUCHPAD_PIN_RIGHT,
         UP = acc::TOUCHPAD_PIN_UP,
         DOWN = acc::TOUCHPAD_PIN_DOWN,
-        NONE = -1,
     };
 
-    static void init() {
+    using PressedListener = std::function<void(pad_t)>;
+
+    static void init(const PressedListener &listener) {
         assert(!_init);
         DEBUG_SIMPLE("Touchpad initialization start");
 
         for (Touchpad &p: pads) p.init0();
+        pressedListener = listener;
 
         _init = true;
         DEBUG_SIMPLE("Touchpad initialization end");
     }
 
-    static pad_t read() {
+    static void read() {
         assert(_init);
 
         static bool isPressed{false};
-        pad_t pressedPad{pad_t::NONE};
+        pad_t const *pressedPad{nullptr};
+
         for (Touchpad &p: pads) {
             if (p.read0()) {
-                pressedPad = p.pad;
+                pressedPad = &p.pad;
                 break;
             }
         }
-        if (!isPressed && pressedPad != pad_t::NONE) {
-            isPressed = true;
-            return pressedPad;
-        }
-        if (isPressed && pressedPad == pad_t::NONE) isPressed = false;
 
-        return pad_t::NONE;
+        if (!isPressed && pressedPad) {
+            isPressed = true;
+            pressedListener(*pressedPad);
+        } else if (isPressed && !pressedPad) isPressed = false;
     }
 
     Touchpad(const Touchpad &) = delete;
@@ -73,8 +74,6 @@ public:
                 return "UP";
             case pad_t::DOWN:
                 return "DOWN";
-            case pad_t::NONE:
-                return "NONE";
         }
     }
 
@@ -91,6 +90,7 @@ private:
     static Touchpad P_DOWN;
     static const std::vector<std::reference_wrapper<Touchpad>> pads;
     static bool _init;
+    static PressedListener pressedListener;
 
     const pad_t pad;
     const uint8_t pin;
@@ -136,6 +136,7 @@ Touchpad Touchpad::P_UP{pad_t::UP};
 Touchpad Touchpad::P_DOWN{pad_t::DOWN};
 const std::vector<std::reference_wrapper<Touchpad>> Touchpad::pads{P_MID, P_LEFT, P_RIGHT, P_UP, P_DOWN};
 bool Touchpad::_init{false};
+Touchpad::PressedListener Touchpad::pressedListener{};
 
 
 #endif //ALARM_CLOCK_R2V6_TOUCHPAD_H

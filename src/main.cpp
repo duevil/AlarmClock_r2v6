@@ -31,12 +31,14 @@ const std::map<const char *const, Property<uint8_t> &> properties = {
         {"onTm", LEDC::durationProperty},
 };
 
+void onTouchpadPress(Touchpad::pad_t);
+
 void setup() {
     DEBUG_INIT();
     DEBUG_SIMPLE("Setup start");
 
     RTC::init();
-    Touchpad::init();
+    Touchpad::init(onTouchpadPress);
     LightSensor::init();
     Matrix::init(lightValue, now, LEDC::lightProperty);
     LEDC::init();
@@ -57,30 +59,28 @@ void setup() {
 }
 
 void loop() {
-    // loop
+    Touchpad::read();
     auto value{LightSensor::read()};
     auto nowDT{ac_time::now()};
-    auto touched{Touchpad::read()};
 
     lightValue.set(value);
     now.set(nowDT);
+}
 
-    if (touched != Touchpad::pad_t::NONE) {
-        DEBUG("Touched pad: ", Touchpad::toString(touched));
-        if (Matrix::isIlluminated()) {
-            switch (touched) {
-                case Touchpad::pad_t::MID:
-                case Touchpad::pad_t::LEFT:
-                case Touchpad::pad_t::RIGHT:
-                case Touchpad::pad_t::NONE:
-                    break;
-                case Touchpad::pad_t::UP:
-                    ++LEDC::lightProperty;
-                    break;
-                case Touchpad::pad_t::DOWN:
-                    --LEDC::lightProperty;
-                    break;
-            }
-        } else Matrix::illuminate();
-    }
+void onTouchpadPress(Touchpad::pad_t pad) {
+    DEBUG("Touched pad: ", Touchpad::toString(pad));
+    if (Matrix::isIlluminated()) {
+        switch (pad) {
+            case Touchpad::pad_t::MID:
+            case Touchpad::pad_t::LEFT:
+            case Touchpad::pad_t::RIGHT:
+                break;
+            case Touchpad::pad_t::UP:
+                ++LEDC::lightProperty;
+                break;
+            case Touchpad::pad_t::DOWN:
+                --LEDC::lightProperty;
+                break;
+        }
+    } else Matrix::illuminate();
 }
