@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Alert?>
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.HBox?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1" type="javafx.scene.control.Alert"
+         xmlns="http://javafx.com/javafx/17.0.2-ea">
+    <dialogPane>
+        <DialogPane headerText="%copyingAlert.header">
+            <graphic>
+                <Label fx:id="progressLabel" HBox.hgrow="ALWAYS">
+                    <padding>
+                        <Insets top="15.0" bottom="15.0"/>
+                    </padding>
+                </Label>
+            </graphic>
+            <content>
+                <ProgressBar fx:id="progressBar" HBox.hgrow="ALWAYS">
+                    <padding>
+                        <Insets top="20.0" bottom="20.0" left="10.0" right="10.0"/>
+                    </padding>
+                </ProgressBar>
+            </content>
+        </DialogPane>
+    </dialogPane>
+    <buttonTypes>
+        <ButtonType fx:constant="FINISH"/>
+        <ButtonType fx:constant="CANCEL"/>
+    </buttonTypes>
+    <fx:define>
+        <Alert fx:id="cancelConfirm" alertType="CONFIRMATION"
+               headerText="%copyingAlert.confirmCancel.header"
+               contentText="%copyingAlert.confirmCancel.content">
+            <buttonTypes>
+                <ButtonType fx:constant="OK"/>
+                <ButtonType text="%copyingAlert.confirmCancel.continue" buttonData="CANCEL_CLOSE"/>
+            </buttonTypes>
+        </Alert>
+    </fx:define>
+</fx:root>

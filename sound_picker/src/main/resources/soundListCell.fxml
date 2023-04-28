@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?language javascript?>
+
+<?import de.alarmclock.soundpicker.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1" type="javafx.scene.control.ListCell"
+         xmlns="http://javafx.com/javafx/17.0.2-ea">
+    <padding>
+        <Insets topRightBottomLeft="0.0"/>
+    </padding>
+    <contentDisplay>
+        <ContentDisplay fx:constant="GRAPHIC_ONLY"/>
+    </contentDisplay>
+    <contextMenu>
+        <ContextMenu>
+            <items>
+                <CheckMenuItem fx:id="allowRandomA" text="%cell.options.allowRandom"/>
+                <SeparatorMenuItem mnemonicParsing="false"/>
+                <MenuItem onAction="#swapAbove" text="%cell.options.swapAbove"/>
+                <MenuItem onAction="#swapBelow" text="%cell.options.swapBelow"/>
+                <MenuItem onAction="#play" text="%cell.options.play"/>
+                <MenuItem onAction="#remove" text="%cell.options.remove"/>
+            </items>
+        </ContextMenu>
+    </contextMenu>
+    <graphic>
+        <HBox spacing="15.0">
+            <alignment>
+                <Pos fx:constant="CENTER"/>
+            </alignment>
+            <padding>
+                <Insets bottom="5.0" left="15.0" right="15.0" top="5.0"/>
+            </padding>
+            <Label fx:id="number">
+                <font>
+                    <Font name="System Bold" size="14.0"/>
+                </font>
+                <tooltip>
+                    <Tooltip text="%cell.tooltip.number"/>
+                </tooltip>
+            </Label>
+            <HBox HBox.hgrow="ALWAYS" spacing="5.0">
+                <alignment>
+                    <Pos fx:constant="CENTER"/>
+                </alignment>
+                <Label text="%cell.checkbox.label">
+                </Label>
+                <CheckBox fx:id="allowRandomB">
+                    <tooltip>
+                        <Tooltip text="%cell.tooltip.allowRandom"/>
+                    </tooltip>
+                </CheckBox>
+            </HBox>
+            <HBox>
+                <TextField fx:id="name" alignment="CENTER" prefColumnCount="16">
+                    <tooltip>
+                        <Tooltip text="%cell.tooltip.name"/>
+                    </tooltip>
+                    <textFormatter>
+                        <SoundListCell.NoEmptyTextFormatter/>
+                    </textFormatter>
+                </TextField>
+                <!--<MenuButton fx:id="menu" text="···">-->
+                <MenuButton text="⋮">
+                    <font>
+                        <Font name="System-Black"/>
+                    </font>
+                    <tooltip>
+                        <Tooltip text="%cell.tooltip.options"/>
+                    </tooltip>
+                    <items>
+                        <CheckMenuItem fx:id="allowRandomC" text="%cell.options.allowRandom"/>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem onAction="#swapAbove" text="%cell.options.swapAbove"/>
+                        <MenuItem onAction="#swapBelow" text="%cell.options.swapBelow"/>
+                        <MenuItem onAction="#play" text="%cell.options.play"/>
+                        <MenuItem onAction="#remove" text="%cell.options.remove"/>
+                    </items>
+                    <cursor>
+                        <Cursor fx:constant="HAND"/>
+                    </cursor>
+                </MenuButton>
+            </HBox>
+        </HBox>
+    </graphic>
+</fx:root>

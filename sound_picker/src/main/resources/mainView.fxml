@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.alarmclock.soundpicker.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Alert?>
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="550.0" prefWidth="520.0"
+            xmlns="http://javafx.com/javafx/17.0.2-ea" fx:controller="de.alarmclock.soundpicker.Controller">
+    <VBox prefHeight="500.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <MenuBar focusTraversable="true">
+            <padding>
+                <Insets topRightBottomLeft="0.0"/>
+            </padding>
+            <Menu text="%menu.title">
+                <MenuItem accelerator="Shortcut+A" onAction="#addSounds" text="%menu.addSounds"/>
+                <MenuItem accelerator="Shortcut+S" onAction="#createJson" text="%menu.createJson"/>
+                <MenuItem accelerator="Shortcut+E" onAction="#copyFiles" text="%menu.copyFiles"/>
+                <SeparatorMenuItem mnemonicParsing="false"/>
+                <MenuItem accelerator="F2" onAction="#showInfo" text="_Info"/>
+                <SeparatorMenuItem mnemonicParsing="false"/>
+                <MenuItem accelerator="ALT+Shortcut+Q" onAction="#close" text="%menu.exit"/>
+            </Menu>
+        </MenuBar>
+        <ListView fx:id="list" focusTraversable="false" VBox.vgrow="SOMETIMES">
+            <placeholder>
+                <Label text="%list.empty" textAlignment="CENTER">
+                    <font>
+                        <Font size="16.0"/>
+                    </font>
+                    <padding>
+                        <Insets bottom="75.0"/>
+                    </padding>
+                </Label>
+            </placeholder>
+            <selectionModel>
+                <NoSelectionModel/>
+            </selectionModel>
+            <cellFactory>
+                <SoundListCell.Factory/>
+            </cellFactory>
+        </ListView>
+    </VBox>
+    <fx:define>
+        <Alert fx:id="info" title="Info" alertType="INFORMATION" headerText="%title" contentText="%information">
+            <buttonTypes>
+                <ButtonType fx:constant="CLOSE"/>
+            </buttonTypes>
+        </Alert>
+    </fx:define>
+</AnchorPane>
