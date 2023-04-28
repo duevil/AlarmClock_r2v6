@@ -5,9 +5,6 @@
 #ifndef ALARM_CLOCK_R2V6_PROPERTY_H
 #define ALARM_CLOCK_R2V6_PROPERTY_H
 
-#include <vector>
-#include <functional>
-
 
 /**
  * @brief Simple class for storing an uint_8 value
@@ -18,7 +15,12 @@ class Property {
 
 public:
 
+    /* A function listening for changes of the Property's value */
     using ChangeListener = std::function<void(T, T)>;
+    /* A map storing a references of properties mapped to keys */
+    using Map = std::map<const char *const, Property<T> &>;
+
+    explicit Property(T initialValue) : val(initialValue) {}
 
     Property() = default;
     virtual ~Property() = default;
@@ -32,9 +34,7 @@ public:
      */
     virtual void set(T value) {
         if (val != value) {
-            for (const auto &listener: listeners) {
-                listener(val, value);
-            }
+            for (const auto &listener: listeners) listener(val, value);
             val = value;
         }
     }
@@ -44,9 +44,7 @@ public:
      * @param listener A function to execute when the value of the property changes
      * @warning Listeners, once attached, can not be removed
      */
-    void addListener(ChangeListener const &listener) {
-        listeners.push_back(listener);
-    }
+    void addListener(ChangeListener const &listener) { listeners.push_back(listener); }
 
     /**
      * Returns the current value of the Property

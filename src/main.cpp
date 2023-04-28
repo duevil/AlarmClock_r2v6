@@ -1,7 +1,7 @@
 //#define NDEBUG
 
 #include <Arduino.h>
-#include <ACr2v6.h>
+#include "ACr2v6/ACr2v6.h"
 
 Property<uint8_t> a1_h;
 Property<uint8_t> a1_m;

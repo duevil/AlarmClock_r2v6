@@ -6,32 +6,38 @@
 #define ALARM_CLOCK_R2V6_MATRIX_H
 
 #include <MD_Parola.h>
-#include <functional>
 #include "font.h"
 
 
 namespace matrix {
 
-    class Matrix {
+    /**
+     * @brief Controls the Alarm Clock's matrix display
+     */
+    class Matrix final : private Initialisable {
 
     public:
 
-        static void init(
-                Property<float> &sensorProperty,
-                Property<DateTime> &timeProperty,
-                Property<uint8_t> &ledcProperty
-        ) {
-            static bool _init{false};
-            assert(!_init);
+        /**
+         * @param sensorProperty The property wrapping the light sensor value
+         * @param timeProperty The property wrapping the current time value
+         * @param ledcProperty The property wrapping the current ledc value
+         */
+        Matrix(Property<float> &sensorProperty,
+               Property<DateTime> &timeProperty,
+               Property<uint8_t> &ledcProperty)
+                : sensorProperty(sensorProperty),
+                  timeProperty(timeProperty),
+                  ledcProperty(ledcProperty) {}
 
+        /**
+         * @brief Initializes the matrix; initializes the hardware and links the property listeners
+         */
+        void init() override {
             DEBUG_SIMPLE("Matrix initialization start");
+            setInit();
 
             static MD_Parola md{MD_MAX72XX::FC16_HW, acc::MATRIX_CS_PIN, acc::MATRIX_NUM_DEVICES};
-            static uint8_t intensity{0};
-            static auto callback = [&ledcProperty]() {
-                wasManuallyIlluminated = false;
-                if (!intensity && !ledcProperty.get()) illumination.set(false);
-            };
 
             md.begin();
             md.setIntensity(0);
@@ -41,15 +47,15 @@ namespace matrix {
             md.displayClear();
 
             timeProperty.addListener([](const DateTime &, const DateTime &now) {
-                char text[]{"hh:mm ss"};
-                now.toString(text);
+                String text{"hh:mm ss"};
+                now.toString(text.begin());
                 text[6] = (char) (192 + text[6] - '0');
                 text[7] = (char) (192 + text[7] - '0');
-                md.displayText(text, PA_CENTER, 0, 0, PA_NO_EFFECT);
+                md.displayText(text.c_str(), PA_CENTER, 0, 0, PA_NO_EFFECT);
                 md.displayAnimate();
             });
 
-            sensorProperty.addListener([&ledcProperty](const float, const float lum) {
+            sensorProperty.addListener([this](const float, const float lum) {
                 intensity = getIntensity(lum);
                 if (!wasManuallyIlluminated && (!ledcProperty.get() || intensity)) {
                     md.setIntensity(intensity);
@@ -57,31 +63,39 @@ namespace matrix {
                 }
             });
 
-            ledcProperty.addListener([](uint8_t, uint8_t ledcVal) {
+            ledcProperty.addListener([this](uint8_t, uint8_t ledcVal) {
                 if (ledcVal) illumination.set(true);
                 else if (!intensity) illuminate();
             });
 
-            illumination.addListener([&ledcProperty](const bool, const bool isIlluminated) {
+            illumination.addListener([this](const bool, const bool isIlluminated) {
                 DEBUG("Matrix illumination: ", isIlluminated);
                 if (!intensity && (ledcProperty.get() || wasManuallyIlluminated)) md.displayShutdown(false);
                 else md.displayShutdown(!isIlluminated);
             });
 
-            timerCallback = [](TimerHandle_t) { callback(); };
             illumination.set(true);
 
-            _init = true;
             DEBUG_SIMPLE("Matrix initialization end");
         }
 
-        static void illuminate() {
+        /**
+         * Manually illuminates the matrix if it was not illuminated by the light sensor's value
+         * and starts the illumination timer
+         */
+        void illuminate() {
+            assert(isInit());
+
+            static auto callback = [this]() {
+                wasManuallyIlluminated = false;
+                if (!intensity && !ledcProperty.get()) illumination.set(false);
+            };
             static const auto tmr = xTimerCreate(
                     "matrix manual illumination",
                     acc::MATRIX_ILLUMINATION_DURATION,
                     pdFALSE,
                     nullptr,
-                    timerCallback
+                    [](TimerHandle_t) { callback(); }
             );
 
             if (!wasManuallyIlluminated) {
@@ -92,25 +106,34 @@ namespace matrix {
             xTimerReset(tmr, 0);
         }
 
-        inline static bool isIlluminated() { return illumination.get(); }
+        /**
+         * @return true, when the matrix is illuminated
+         */
+        inline bool isIlluminated() const { return illumination.get(); }
 
     private:
 
-        static Property<bool> illumination;
-        static bool wasManuallyIlluminated;
-        static TimerCallbackFunction_t timerCallback;
+        Property<float> &sensorProperty;
+        Property<DateTime> &timeProperty;
+        Property<uint8_t> &ledcProperty;
+        Property<bool> illumination{};
+        uint8_t intensity{0};
+        bool wasManuallyIlluminated{false};
 
+        /**
+         * @brief Calculates the intensity for the given light value
+         * @param lum The value of the light sensor
+         * @return The calculated matrix led intensity (0-15)
+         */
         static uint8_t getIntensity(const float lum) { return (uint8_t) (lum * acc::MATRIX_LIGHT_ADJUSTMENT); }
 
     };
 
-    Property<bool> Matrix::illumination{};
-    bool Matrix::wasManuallyIlluminated{false};
-    TimerCallbackFunction_t Matrix::timerCallback{};
-
 }
 
-using matrix::Matrix;
+namespace ac_r2v6 {
+    using matrix::Matrix;
+}
 
 
 #endif //ALARM_CLOCK_R2V6_MATRIX_H
