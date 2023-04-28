@@ -1,7 +1,7 @@
 //#define NDEBUG
 
 #include <Arduino.h>
-#include "AlarmClock/AlarmClock.h"
+#include <AlarmClock.h>
 
 void setup() {
     // put your setup code here, to run once
