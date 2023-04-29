@@ -5,4 +5,21 @@
 #ifndef ALARM_CLOCK_R2V6_ALARM_CLOCK_H
 #define ALARM_CLOCK_R2V6_ALARM_CLOCK_H
 
+#include <Arduino.h>
+// c++ standard libraries
+#include <memory>
+#include <functional>
+#include <numeric>
+#include <algorithm>
+#include <vector>
+#include <array>
+#include <map>
+#include <unordered_map>
+// third party libraries
+// own classes and headers
+#include "base/debug.h"
+#include "base/AveragedValue.hpp"
+#include "esp32/Touchpad.hpp"
+#include "main/Navigation.hpp"
+
 #endif //ALARM_CLOCK_R2V6_ALARM_CLOCK_H
