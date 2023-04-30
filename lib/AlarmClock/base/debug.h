@@ -24,34 +24,41 @@ int64_t ac_debug_millis(int64_t offset = 0) {
  * After the startup delay, the elapsed milliseconds are stored as the offset for the millisecond to be printed in the debug messages.
  * @param ... the parameters passed to Serial.begin(...)
  */
-#define DEBUG_INIT(...) do {                        \
-    Serial.begin(__VA_ARGS__);                      \
-    for (int i = 0; i < 10; ++i) {                  \
-        Serial.print('.');                          \
-        delay(250);                                 \
-    }                                               \
-    Serial.println();                               \
-    ac_debug_millis(esp_timer_get_time() / 1000LL); \
+#define DEBUG_INIT(...) do {                \
+    Serial.begin(__VA_ARGS__);              \
+    for (int i = 0; i < 10; ++i) {          \
+        Serial.print('.');                  \
+        delay(250);                         \
+    }                                       \
+    Serial.println();                       \
+    ac_debug_millis(                        \
+            esp_timer_get_time() / 1000LL); \
 } while (0)
 
 /**
- * @brief Prints a debug message to the serial connection. The message is prefixed with the current time in milliseconds.
+ * @brief Prints a debug message to the serial connection.
+ * The message is prefixed with the current time in milliseconds and the function name, using the __ASSERT_FUNC macro.
  * @param ... the parameters passed to Serial.print(...)
  */
-#define DEBUG(...) do {                             \
-    Serial.printf("[%lld] ", ac_debug_millis());    \
-    Serial.print(__VA_ARGS__);                      \
-    Serial.println();                               \
+#define DEBUG(...) do {                    \
+    Serial.printf("[%lld] %s: ",           \
+            ac_debug_millis(),             \
+            __ASSERT_FUNC);                \
+    Serial.print(__VA_ARGS__);             \
+    Serial.println();                      \
 } while (0)
 
 /**
- * @brief Prints a formatted debug message to the serial connection. The message is prefixed with the current time in milliseconds.
+ * @brief Prints a formatted debug message to the serial connection.
+ * The message is prefixed with the current time in milliseconds and the function name, using the __ASSERT_FUNC macro.
  * @param ... the parameters passed to Serial.printf(...)
  */
-#define DEBUG_F(...) do {                           \
-    Serial.printf("[%lld] ", ac_debug_millis());    \
-    Serial.printf(__VA_ARGS__);                     \
-    Serial.println();                               \
+#define DEBUG_F(...) do {                  \
+    Serial.printf("[%lld] %s: ",           \
+            ac_debug_millis(),             \
+            __ASSERT_FUNC);                \
+    Serial.printf(__VA_ARGS__);            \
+    Serial.println();                      \
 } while (0)
 
 #else

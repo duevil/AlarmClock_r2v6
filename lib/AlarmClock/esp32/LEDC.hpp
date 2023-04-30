@@ -38,7 +38,7 @@ public:
      * @brief Sets up the LEDC channel.
      */
     void setup() const {
-        DEBUG_F("LEDC::setup() pin=%d channel=%d resolution=%d", pin, channel, resolution);
+        DEBUG_F("pin=%d channel=%d resolution=%d", pin, channel, resolution);
         auto freq = ledcSetup(channel, 5000, this->resolution);
         assert(freq != 0 && "Could not setup LEDC channel!");
         ledcAttachPin(pin, channel);

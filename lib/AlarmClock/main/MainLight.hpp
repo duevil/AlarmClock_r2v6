@@ -47,13 +47,13 @@ public:
     void setup() {
         ledc.setup();
         duty.addChangeListener([this](const Property<uint8_t> &, uint8_t, uint8_t v) {
-            DEBUG_F("MainLight::dutyChangeListener() duty changed to %d", v);
+            DEBUG_F("duty changed to %d", v);
             ledc.setDuty(LINEAR_DUTY_LUT[v]);
             if (v > 0) timer.reset();
             else timer.stop();
         });
         duration.addChangeListener([this](const Property<uint8_t> &, uint8_t, uint8_t v) {
-            DEBUG_F("MainLight::durationChangeListener() duration changed to %d", v);
+            DEBUG_F("duration changed to %d", v);
             timer.changePeriod(1000 * 60 * DURATION_LUT[v]);
             if (duty.get() > 0) timer.reset();
             else timer.stop();

@@ -11,7 +11,7 @@ LightSensor lightSensor{};
 
 void setup() {
     DEBUG_INIT(115200);
-    DEBUG("::setup() start");
+    DEBUG("setup begin");
 
     navigation.setup();
     mainLight.setup();
@@ -22,7 +22,7 @@ void setup() {
         DEBUG_F("lightLevel changed to %f", v);
     });
 
-    DEBUG("::setup() end");
+    DEBUG("setup end");
 }
 
 void loop() {
@@ -37,20 +37,20 @@ void loop() {
 void navigationCallback(const Navigation::PadType &pad) {
     switch (pad) {
         case Navigation::PadType::MID:
-            DEBUG("::navigationCallback() pad touched: MID");
+            DEBUG("pad touched: MID");
             break;
         case Navigation::PadType::LEFT:
-            DEBUG("::navigationCallback() pad touched: LEFT");
+            DEBUG("pad touched: LEFT");
             break;
         case Navigation::PadType::RIGHT:
-            DEBUG("::navigationCallback() pad touched: RIGHT");
+            DEBUG("pad touched: RIGHT");
             break;
         case Navigation::PadType::UP:
-            DEBUG("::navigationCallback() pad touched: UP");
+            DEBUG("pad touched: UP");
             mainLight.incrDuty();
             break;
         case Navigation::PadType::DOWN:
-            DEBUG("::navigationCallback() pad touched: DOWN");
+            DEBUG("pad touched: DOWN");
             mainLight.decrDuty();
             break;
     }

@@ -47,7 +47,7 @@ public:
     void start() const {
         auto result = xTimerStart(handle, 0);
         assert(result == pdPASS && "Could not start timer");
-        DEBUG_F("Timer::start() name=%s", pcTimerGetTimerName(handle));
+        DEBUG_F("name=%s", pcTimerGetTimerName(handle));
     }
 
     /**
@@ -56,7 +56,7 @@ public:
     void stop() const {
         auto result = xTimerStop(handle, 0);
         assert(result == pdPASS && "Could not stop timer");
-        DEBUG_F("Timer::stop() name=%s", pcTimerGetTimerName(handle));
+        DEBUG_F("name=%s", pcTimerGetTimerName(handle));
     }
 
     /**
@@ -65,7 +65,7 @@ public:
     void reset() const {
         auto result = xTimerReset(handle, 0);
         assert(result == pdPASS && "Could not reset timer");
-        DEBUG_F("Timer::reset() name=%s", pcTimerGetTimerName(handle));
+        DEBUG_F("name=%s", pcTimerGetTimerName(handle));
     }
 
     /**
@@ -75,7 +75,7 @@ public:
     void changePeriod(uint32_t milliseconds) const {
         auto result = xTimerChangePeriod(handle, pdMS_TO_TICKS(milliseconds), 0);
         assert(result == pdPASS && "Could not change timer period");
-        DEBUG_F("Timer::changePeriod() name=%s period=%d", pcTimerGetTimerName(handle), milliseconds);
+        DEBUG_F("name=%s period=%d", pcTimerGetTimerName(handle), milliseconds);
     }
 
     // disable copy constructor and assignment operator

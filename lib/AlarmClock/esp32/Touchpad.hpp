@@ -39,10 +39,10 @@ public:
      * Sets the threshold to the average value times the tolerance.
      */
     void setup() {
-        DEBUG_F("Touchpad::setup() pin=%d", pin);
+        DEBUG_F("pin=%d", pin);
         for (int i = 0; i < READINGS; ++i) touchRead();
         threshold = value * TOLERANCE;
-        DEBUG_F("Touchpad::setup() threshold=%f", threshold);
+        DEBUG_F("threshold=%f", threshold);
     }
 
     /**

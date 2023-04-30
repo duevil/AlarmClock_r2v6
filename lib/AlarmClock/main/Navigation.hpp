@@ -79,7 +79,7 @@ public:
 
         if (!touched && pad) {
             touched = true;
-            DEBUG_F("Touchpad::loop() pad=%d touched, calling callback", static_cast<int>(*pad));
+            DEBUG_F("pad=%d touched, calling callback", static_cast<int>(*pad));
             callback(*pad);
         } else if (touched && !pad) touched = false;
     }

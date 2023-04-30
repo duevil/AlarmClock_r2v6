@@ -22,19 +22,19 @@ public:
      * Reads the sensor multiple times to get a good average value.
      */
     void setup() {
-        DEBUG_F("LightSensor::setup() begin");
+        DEBUG_F("setup begin");
         bool success = sensor.begin(BH1750_TO_GROUND);
-        assert(success && "LightSensor::setup() sensor.begin() failed");
+        assert(success && "sensor.begin() failed");
         sensor.calibrateTiming();
         sensor.setQuality(BH1750_QUALITY_HIGH2);
+        sensor.adjustSettings(ADJUSTMENT);
         sensor.start();
         for (int i = 0; i < READINGS; ++i) {
             if (sensor.hasValue(true)) value = sensor.getLux();
             sensor.start();
         }
         lightLevel = value;
-        DEBUG_F("LightSensor::setup() initial value=%f", static_cast<float>(value));
-        DEBUG_F("LightSensor::setup() end");
+        DEBUG_F("setup end");
     }
 
     /**
@@ -43,8 +43,7 @@ public:
     void readLightLevel() {
         if (sensor.hasValue()) {
             auto lux = sensor.getLux();
-            value = lux;
-            lightLevel = value;
+            lightLevel = value = lux;
             sensor.adjustSettings(ADJUSTMENT);
             sensor.start();
         }
