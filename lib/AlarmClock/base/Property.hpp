@@ -13,14 +13,9 @@
 template<typename T>
 class Property {
 
-private:
+public:
     using ChangeListener = std::function<void(const Property<T> &, T, T)>;
 
-    const char *name{};
-    T value;
-    std::vector<ChangeListener> changeListeners{};
-
-public:
     /**
      * Creates a new property with a name and an initial value.
      * @param name the name of the property
@@ -92,6 +87,12 @@ public:
 
     Property(const Property &other) = delete;
     Property &operator=(const Property &other) = delete;
+
+private:
+
+    const char *name{};
+    T value;
+    std::vector<ChangeListener> changeListeners{};
 
 };
 

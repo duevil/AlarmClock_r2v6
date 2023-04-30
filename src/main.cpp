@@ -4,46 +4,53 @@
 #include <AlarmClock.h>
 
 
-void navigationCallback(const Navigation::pad_t &pad);
-const Navigation navigation{navigationCallback};
-const MainLight mainLight{};
+void navigationCallback(const Navigation::PadType &pad);
+Navigation navigation{navigationCallback};
+MainLight mainLight{};
+LightSensor lightSensor{};
 
 void setup() {
     DEBUG_INIT(115200);
-    DEBUG("setup begin");
+    DEBUG("::setup() start");
 
     navigation.setup();
     mainLight.setup();
-    mainLight.setDuration(MainLight::Duration::MIN_5);
+    lightSensor.setup();
 
-    DEBUG("setup end");
+    mainLight.setDuration(MainLight::Duration::MIN_5);
+    lightSensor.getLightLevelProperty().addChangeListener([](const Property<float> &, float, float v) {
+        DEBUG_F("lightLevel changed to %f", v);
+    });
+
+    DEBUG("::setup() end");
 }
 
 void loop() {
     navigation.loop();
+    lightSensor.readLightLevel();
 }
 
 /**
  * Callback for navigation touchpad
  * @param pad the pad that was touched
  */
-void navigationCallback(const Navigation::pad_t &pad) {
+void navigationCallback(const Navigation::PadType &pad) {
     switch (pad) {
-        case Navigation::pad_t::MID:
-            DEBUG("MID");
+        case Navigation::PadType::MID:
+            DEBUG("::navigationCallback() pad touched: MID");
             break;
-        case Navigation::pad_t::LEFT:
-            DEBUG("LEFT");
+        case Navigation::PadType::LEFT:
+            DEBUG("::navigationCallback() pad touched: LEFT");
             break;
-        case Navigation::pad_t::RIGHT:
-            DEBUG("RIGHT");
+        case Navigation::PadType::RIGHT:
+            DEBUG("::navigationCallback() pad touched: RIGHT");
             break;
-        case Navigation::pad_t::UP:
-            DEBUG("UP");
+        case Navigation::PadType::UP:
+            DEBUG("::navigationCallback() pad touched: UP");
             mainLight.incrDuty();
             break;
-        case Navigation::pad_t::DOWN:
-            DEBUG("DOWN");
+        case Navigation::PadType::DOWN:
+            DEBUG("::navigationCallback() pad touched: DOWN");
             mainLight.decrDuty();
             break;
     }

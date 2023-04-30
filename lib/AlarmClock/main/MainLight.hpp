@@ -38,11 +38,13 @@ public:
         MIN_240 = 9,
     };
 
+    MainLight() = default;
+
     /**
      * @brief Sets up the main light. Sets up the ledc
      * and attaches change listeners to the duty and duration properties for controlling the timer and ledc.
      */
-    void setup() const {
+    void setup() {
         ledc.setup();
         duty.addChangeListener([this](const Property<uint8_t> &, uint8_t, uint8_t v) {
             DEBUG_F("MainLight::dutyChangeListener() duty changed to %d", v);
@@ -62,37 +64,42 @@ public:
 
     uint8_t getDuration() const { return duration.get(); }
 
-    void setDuty(Duty val) const { duty = static_cast<uint8_t>(val); }
+    void setDuty(Duty val) { duty = static_cast<uint8_t>(val); }
 
-    void setDuration(Duration val) const { duration = static_cast<uint8_t>(val); }
+    void setDuration(Duration val) { duration = static_cast<uint8_t>(val); }
 
     /**
      * @brief Increases the duty by one, wrapping around at the maximum value.
      */
-    void incrDuty() const { duty = (duty + 1) % LINEAR_DUTY_LUT.size(); }
+    void incrDuty() { duty = (duty + 1) % LINEAR_DUTY_LUT.size(); }
 
     /**
      * @brief Decreases the duty by one, wrapping around at the minimum value.
      */
-    void decrDuty() const { duty = (duty - 1 + LINEAR_DUTY_LUT.size()) % LINEAR_DUTY_LUT.size(); }
+    void decrDuty() { duty = (duty - 1 + LINEAR_DUTY_LUT.size()) % LINEAR_DUTY_LUT.size(); }
 
     /**
      * @brief Increases the duration by one, wrapping around at the maximum value.
      */
-    void incrDuration() const { duration = (duration + 1) % DURATION_LUT.size();}
+    void incrDuration() { duration = (duration + 1) % DURATION_LUT.size(); }
 
     /**
      * @brief Decreases the duration by one, wrapping around at the minimum value.
      */
-    void decrDuration() const { duration = (duration - 1 + DURATION_LUT.size()) % DURATION_LUT.size();}
+    void decrDuration() { duration = (duration - 1 + DURATION_LUT.size()) % DURATION_LUT.size(); }
+
+    // disable copy constructor and assignment operator
+
+    MainLight(const MainLight &) = delete;
+    MainLight &operator=(const MainLight &) = delete;
 
 private:
     static constexpr int LEDC_PIN = 25;
     static const std::array<uint8_t, 4> LINEAR_DUTY_LUT; // lookup table for 2 bit linear brightness
     static const std::array<uint8_t, 10> DURATION_LUT; // lookup table for duration in minutes
 
-    mutable Property<uint8_t> duty{"lightDuty"};
-    mutable Property<uint8_t> duration{"lightDur", static_cast<uint8_t>(Duration::MIN_30)};
+    Property<uint8_t> duty{"lightDuty"};
+    Property<uint8_t> duration{"lightDur", static_cast<uint8_t>(Duration::MIN_30)};
 
     const LEDC ledc{LEDC_PIN, LEDC::Resolution::BITS_8};
     const Timer timer{

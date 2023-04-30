@@ -16,9 +16,11 @@
 #include <map>
 #include <unordered_map>
 // third party libraries
+#include <hp_BH1750.h>
 // own classes and headers
 #include "base/debug.h"
 #include "main/Navigation.hpp"
 #include "main/MainLight.hpp"
+#include "main/LightSensor.hpp"
 
 #endif //ALARM_CLOCK_R2V6_ALARM_CLOCK_H

@@ -25,7 +25,7 @@ private:
      * @brief Reads the touch-capacitive pin and updates the average value.
      */
     void touchRead() {
-        float val{};
+        float val;
         while ((val = ::touchRead(pin)) == 0);
         value = val;
     }

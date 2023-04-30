@@ -25,7 +25,7 @@
 class Navigation {
 
 public:
-    enum class pad_t : uint8_t {
+    enum class PadType : uint8_t {
         MID = 12,
         LEFT = 14,
         RIGHT = 27,
@@ -34,20 +34,20 @@ public:
     };
 
 private:
-    Touchpad mid{static_cast<uint8_t>(pad_t::MID)};
-    Touchpad left{static_cast<uint8_t>(pad_t::LEFT)};
-    Touchpad right{static_cast<uint8_t>(pad_t::RIGHT)};
-    Touchpad up{static_cast<uint8_t>(pad_t::UP)};
-    Touchpad down{static_cast<uint8_t>(pad_t::DOWN)};
-    const std::array<std::pair<pad_t, Touchpad *>, 5> pads{{
-        {pad_t::MID, &mid},
-        {pad_t::LEFT, &left},
-        {pad_t::RIGHT, &right},
-        {pad_t::UP, &up},
-        {pad_t::DOWN, &down},
+    Touchpad mid{static_cast<uint8_t>(PadType::MID)};
+    Touchpad left{static_cast<uint8_t>(PadType::LEFT)};
+    Touchpad right{static_cast<uint8_t>(PadType::RIGHT)};
+    Touchpad up{static_cast<uint8_t>(PadType::UP)};
+    Touchpad down{static_cast<uint8_t>(PadType::DOWN)};
+    const std::array<std::pair<PadType, Touchpad *>, 5> pads{{
+        {PadType::MID, &mid},
+        {PadType::LEFT, &left},
+        {PadType::RIGHT, &right},
+        {PadType::UP, &up},
+        {PadType::DOWN, &down},
     }};
 
-    using callback_t = std::function<void(pad_t)>;
+    using callback_t = std::function<void(PadType)>;
     callback_t callback;
 
 public:
@@ -64,11 +64,11 @@ public:
 
     /**
      * @brief Checks if one of the touchpads is touched.
-     * If one of the touchpads is touched, the callback is called once.
+     * If one of the touchpads was touched, the callback is called once.
      */
     void loop() const {
         static bool touched{false};
-        const pad_t *pad{nullptr};
+        const PadType *pad{nullptr};
 
         for (auto &pair: pads) {
             if (pair.second->isTouched()) {
