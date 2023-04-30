@@ -6,12 +6,15 @@
 
 void navigationCallback(const Navigation::pad_t &pad);
 const Navigation navigation{navigationCallback};
+const MainLight mainLight{};
 
 void setup() {
     DEBUG_INIT(115200);
     DEBUG("setup begin");
 
     navigation.setup();
+    mainLight.setup();
+    mainLight.setDuration(MainLight::Duration::MIN_5);
 
     DEBUG("setup end");
 }
@@ -37,9 +40,11 @@ void navigationCallback(const Navigation::pad_t &pad) {
             break;
         case Navigation::pad_t::UP:
             DEBUG("UP");
+            mainLight.incrDuty();
             break;
         case Navigation::pad_t::DOWN:
             DEBUG("DOWN");
+            mainLight.decrDuty();
             break;
     }
 }

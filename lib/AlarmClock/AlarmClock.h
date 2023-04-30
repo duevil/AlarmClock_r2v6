@@ -18,8 +18,7 @@
 // third party libraries
 // own classes and headers
 #include "base/debug.h"
-#include "base/AveragedValue.hpp"
-#include "esp32/Touchpad.hpp"
 #include "main/Navigation.hpp"
+#include "main/MainLight.hpp"
 
 #endif //ALARM_CLOCK_R2V6_ALARM_CLOCK_H
