@@ -6,7 +6,17 @@
 #define MD_PAROLA_MATRIX_FONT_H
 
 
-namespace md_parola_matrix64x16 {
+namespace md_parola_matrix32x8 {
+    /**
+     * @brief The font used by the matrix display
+     * A custom font containing only the following characters:\n
+     * - Digits 0-9\n
+     * - Letters A-Z and a-z\n
+     * - Special characters: .: and space\n
+     * - The degree sign (*), the bell character ($) and the bell outline (%)\n
+     * - Subscript digits 0-9 (192-201)
+     * @see <a href="https://pjrp.github.io/MDParolaFontEditor/">MDParolaFontEditor</a>
+     */
     constexpr MD_MAX72XX::fontType_t
             matrix_font[] = {
             0,    // 0

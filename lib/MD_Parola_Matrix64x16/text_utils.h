@@ -6,6 +6,15 @@
 #define MD_PAROLA_MATRIX_TEXT_UTILS_H
 
 
+/**
+ * @brief Converts a number to a string with a given number of digits, appending leading zeros if necessary
+ * and optionally converts the digits to subscript
+ * @tparam T The type of the number
+ * @param number The number to convert
+ * @param digits The number of digits the resulting string should have
+ * @param subscript Whether the digits should be converted to subscript
+ * @return The resulting string
+ */
 template<typename T>
 std::string numToStr(T number, uint8_t digits = 2, bool subscript = false) {
     auto s = std::to_string(number);
@@ -20,8 +29,16 @@ constexpr auto degreeSign = '*';
 constexpr auto bellFilled = '$';
 constexpr auto bellOutline = '%';
 
+/**
+ * @brief Return the bell character
+ * @param filled Whether the bell should be filled or not
+ * @return The bell character
+ */
 constexpr char c_bell(bool filled = true) { return filled ? bellFilled : bellOutline; }
 
+/**
+ * @brief A struct representing the bell character, storing whether it should be filled or not
+ */
 struct Bell {
     bool filled;
     explicit Bell(bool filled = true) : filled(filled) {}
