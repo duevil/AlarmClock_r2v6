@@ -1,0 +1,15 @@
+{
+  "name": "BH1750 Light Sensor",
+  "version": "1.0.0",
+  "authors": {
+    "name": "Malte Kasolowsky"
+  },
+  "dependencies": {
+    "AveragedValue": "^1.0.0",
+    "starmbi/hp_BH1750": "^1.0.2"
+  },
+  "frameworks": [
+    "arduino"
+  ],
+  "platforms": "*"
+}

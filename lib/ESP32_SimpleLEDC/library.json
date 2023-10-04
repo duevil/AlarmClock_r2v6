@@ -1,0 +1,15 @@
+{
+  "name": "ESP32 Simple LEDC",
+  "version": "1.0.0",
+  "authors": {
+    "name": "Malte Kasolowsky"
+  },
+  "dependencies": {
+  },
+  "frameworks": [
+    "arduino"
+  ],
+  "platforms": [
+    "espressif32"
+  ]
+}

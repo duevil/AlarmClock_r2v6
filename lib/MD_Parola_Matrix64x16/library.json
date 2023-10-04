@@ -1,0 +1,16 @@
+{
+  "name": "MD Parola Matrix64x16",
+  "version": "1.0.0",
+  "authors": {
+    "name": "Malte Kasolowsky"
+  },
+  "dependencies": {
+    "SPI": "*",
+    "majicdesigns/MD_MAX72XX": "^3.4.1",
+    "majicdesigns/MD_Parola": "^3.7.1"
+  },
+  "frameworks": [
+    "arduino"
+  ],
+  "platforms": "*"
+}

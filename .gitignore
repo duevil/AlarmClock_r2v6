@@ -1,5 +1,1 @@
 .pio
-CMakeListsPrivate.txt
-cmake-build-*/
-/test.exe
-/test/test.cpp

@@ -1,0 +1,11 @@
+{
+  "name": "AveragedValue",
+  "version": "1.0.0",
+  "authors": {
+    "name": "Malte Kasolowsky"
+  },
+  "dependencies": {
+  },
+  "frameworks": "*",
+  "platforms": "*"
+}

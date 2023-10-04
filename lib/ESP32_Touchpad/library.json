@@ -1,0 +1,16 @@
+{
+  "name": "ESP32 Touchpad",
+  "version": "1.0.0",
+  "authors": {
+    "name": "Malte Kasolowsky"
+  },
+  "dependencies": {
+    "AveragedValue": "1.0.0"
+  },
+  "frameworks": [
+    "arduino"
+  ],
+  "platforms": [
+    "espressif32"
+  ]
+}
