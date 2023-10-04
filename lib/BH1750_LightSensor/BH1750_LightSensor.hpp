@@ -35,14 +35,15 @@ public:
     /**
      * @brief Reads the light level from the BH1750 sensor. \n
      * This function is non-blocking and therefore should be called regularly.
+     * @return True if a value was read and a new reading was started, false otherwise.
      */
-    void tryReading() {
+    bool tryReading() {
         assert(setupDone);
         if (sensor.hasValue()) {
             value = sensor.getLux();
-            sensor.adjustSettings(ADJUSTMENT);
-            sensor.start();
+            return sensor.adjustSettings(ADJUSTMENT) && sensor.start();
         }
+        return false;
     }
 
      float getValue() { return value; }
