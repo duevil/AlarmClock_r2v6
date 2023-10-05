@@ -22,5 +22,6 @@ constexpr auto TIME_ZONE = "CET-1CEST,M3.5.0,M10.5.0/3";
 constexpr auto NTP_SERVER_1 = "pool.ntp.org";
 constexpr auto NTP_SERVER_2 = "time.nist.gov";
 constexpr auto NTP_SERVER_3 = "time.google.com";
+constexpr auto PREFERENCES_NAMESPACE = "AlarmClock";
 
 #endif //ALARM_CLOCK_CONSTANTS_H

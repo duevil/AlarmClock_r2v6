@@ -15,6 +15,9 @@ namespace AlarmClock {
         Serial.begin(SERIAL_BAUD);
         bootProgress(BootState::Start);
 
+        AC.preferences.begin(PREFERENCES_NAMESPACE);
+        AC.mainLight.setup();
+
         bootProgress(BootState::Matrix);
         AC.matrix.setup();
 
@@ -29,7 +32,8 @@ namespace AlarmClock {
         esp32_wifi::setup([]() { bootProgress(BootState::SmartConfig); });
 
         bootProgress(BootState::NTP);
-        esp32_wifi::setupNTP([](struct timeval *) { rtc::adjustTimeFromInternalRTC(); }, TIME_ZONE);
+        AC.tz.load();
+        esp32_wifi::setupNTP([](struct timeval *) { rtc::adjustTimeFromInternalRTC(); }, ((String) AC.tz).c_str());
 
         bootProgress(BootState::Webserver);
         webserver::setup();
@@ -38,11 +42,10 @@ namespace AlarmClock {
         AC.lightSensor.setup();
 
         bootProgress(BootState::LEDC);
-        AC.mainLight.setup();
         AC.indicatorLight.setup();
 
         bootProgress(BootState::Player);
-        player::setup();
+        AC.player.setup();
 
         bootProgress(BootState::Done);
     }
@@ -67,7 +70,7 @@ namespace AlarmClock {
                 false,
                 []() { matrixIlluminate = false; }
         };
-        
+
         matrix.loop();
 
         // callback to illuminate the matrix
@@ -81,7 +84,7 @@ namespace AlarmClock {
             auto value = AC.lightSensor.getValue();
             if (lightLevel != 0 && value == 0) illuminateMatrix();
             lightLevel = value;
-            matrix.setBrightness((uint8_t) (0.1005 * lightLevel - 0.05));
+            matrix.setBrightness((uint8_t)(0.1005 * lightLevel - 0.05));
             matrix.shutdown(lightLevel == 0 && !matrixIlluminate && !mainLight.getDuty());
         }
 
@@ -109,14 +112,12 @@ namespace AlarmClock {
                     matrixScrollTimer.start();
                     break;
                 case navigation::Direction::Up:
-                    ++mainLight;
-                    if (mainLight.getDuty()) AC.mainLightTimer.start();
-                    else illuminateMatrix();
+                    mainLight.incrDuty();
+                    if (!mainLight.getDuty()) illuminateMatrix();
                     break;
                 case navigation::Direction::Down:
-                    --mainLight;
-                    if (mainLight.getDuty()) AC.mainLightTimer.start();
-                    else illuminateMatrix();
+                    mainLight.decrDuty();
+                    if (!mainLight.getDuty()) illuminateMatrix();
                     break;
                 case navigation::Direction::None:
                     // do nothing

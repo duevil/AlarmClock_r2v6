@@ -28,7 +28,9 @@
 #include "ESP32_Timer.h"
 // internal classes and headers
 #include "constants.h"
-#include "MainLightDuration.hpp"
+#include "Bean.hpp"
+#include "MainLight.hpp"
+#include "Player.hpp"
 #include "AlarmClock.hpp"
 // internal functions
 #include "navigation.h"
@@ -36,7 +38,6 @@
 #include "esp32_wifi.h"
 #include "webserver.h"
 #include "bootProgress.h"
-#include "player.h"
 #include "ac_main.h" // needs to be included last
 
 #endif //ALARM_CLOCK_H

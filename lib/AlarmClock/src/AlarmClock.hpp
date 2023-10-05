@@ -10,19 +10,15 @@ namespace AlarmClock {
 
     struct {
 
-        // variables
-
         float lightLevel{0.0f};
         DateTime now{};
-
-        // data objects
-
+        StringBean tz{"timeZone", preferences};
+        Preferences preferences{};
         RTC_DS3231 rtc{};
         AsyncWebServer server{SERVER_PORT};
         LightSensor lightSensor{};
         LEDC indicatorLight{INDICATOR_LED_PIN, LEDC::Resolution::BITS_8};
-        LEDC mainLight{LIGHT_PIN, LEDC::Resolution::BITS_3};
-        MainLightDuration mainLightDuration{};
+        MainLight mainLight{preferences};
         Matrix32x8 matrix{SPI_CS_PIN, [this]() {
             return numToStr(now.hour()) + ':' +
                    numToStr(now.minute()) + " " +
@@ -34,21 +30,12 @@ namespace AlarmClock {
             now.toString(dateStr);
             return std::string{dateStr};
         }};
-        DFRobotDFPlayerMini player{};
-
-        // timers
-
+        Player player{preferences};
         ESP32_Timer rtcTimer{
                 "RTC Timer",
                 1000,
                 true,
                 [this]() { now = rtc.now(); }
-        };
-        ESP32_Timer mainLightTimer{
-                "Main Light Timer",
-                mainLightDuration.toMS(),
-                false,
-                [this]() { mainLight.toggleOff(); }
         };
 
 

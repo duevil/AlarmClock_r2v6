@@ -37,7 +37,7 @@ namespace AlarmClock {
 
         void play(AsyncWebServerRequest * request) {
             if (request->hasParam("sound")) {
-                auto sound = request->getParam("sound")->value().toInt();
+                auto sound = (uint8_t) request->getParam("sound")->value().toInt();
                 // TODO: check if sound is valid
                 // TODO: play sound
                 if (sound == 0) AC.player.play(1);
@@ -49,7 +49,6 @@ namespace AlarmClock {
         }
 
         void stop(AsyncWebServerRequest * request) {
-            // TODO: stop sound
             AC.player.stop();
             request->send(204);
         }
@@ -58,6 +57,7 @@ namespace AlarmClock {
             auto timeZone = json["timeZone"].as<const char *>();
             if (setenv("TZ", timeZone, 1) == 0) {
                 tzset();
+                AC.tz = timeZone;
                 request->send(204);
             } else {
                 request->send(400, "text/plain", "Invalid time zone");
@@ -94,8 +94,7 @@ namespace AlarmClock {
         void getLight(AsyncWebServerRequest *request) {
             auto *response = new AsyncJsonResponse();
             auto root = response->getRoot();
-            root["duty"] = AC.mainLight.getDuty();
-            root["duration"] = AC.mainLightDuration.get();
+            AC.mainLight.toJson(root);
             response->setLength();
             request->send(response);
         }
@@ -103,8 +102,7 @@ namespace AlarmClock {
         void getPlayer(AsyncWebServerRequest *request) {
             auto *response = new AsyncJsonResponse();
             auto root = response->getRoot();
-            // TODO: player data
-            root["volume"] = AC.player.readVolume();
+            root["volume"] = AC.player.getVolume();
             response->setLength();
             request->send(response);
         }
@@ -163,20 +161,17 @@ namespace AlarmClock {
         }
 
         void putLight(AsyncWebServerRequest *request, JsonVariant &json) {
-            AC.mainLight.setDuty(json["duty"].as<uint8_t>());
-            AC.mainLightDuration = json["duration"].as<uint8_t>();
-            if (AC.mainLight.getDuty()) AC.mainLightTimer.start();
+            AC.mainLight.fromJson(json);
             request->send(204);
         }
 
         void putPlayer(AsyncWebServerRequest *request, JsonVariant &json) {
-            // TODO: player data
             auto volume = json["volume"].as<uint8_t>();
             if (volume > 30) {
                 request->send(400, "text/plain", "Invalid must be between 0 and 30");
                 return;
             }
-            AC.player.volume(volume);
+            AC.player.setVolume(volume);
             request->send(204);
         }
 

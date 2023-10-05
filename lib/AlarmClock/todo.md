@@ -8,7 +8,6 @@ Features to implement:
   - Alarm handling
 - Preferences storage
 - DFRobot player control
-  - Playback & volume control
   - Sound randomization
 - SPIFFS sound list
   - JSON sound parsing
