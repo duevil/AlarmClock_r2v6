@@ -41,6 +41,9 @@ namespace AlarmClock {
         AC.mainLight.setup();
         AC.indicatorLight.setup();
 
+        bootProgress(BootState::Player);
+        player::setup();
+
         bootProgress(BootState::Done);
     }
 

@@ -19,6 +19,7 @@ namespace AlarmClock {
         Webserver = 36,
         LightSensor = 41,
         LEDC = 46,
+        Player = 51,
         Done = 100,
     };
 
@@ -65,6 +66,9 @@ namespace AlarmClock {
                 break;
             case BootState::LEDC:
                 Serial.println("LEDC");
+                break;
+            case BootState::Player:
+                Serial.println("Player");
                 break;
         }
         return state;

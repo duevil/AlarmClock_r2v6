@@ -34,6 +34,7 @@ namespace AlarmClock {
             now.toString(dateStr);
             return std::string{dateStr};
         }};
+        DFRobotDFPlayerMini player{};
 
         // timers
 

@@ -36,6 +36,7 @@
 #include "esp32_wifi.h"
 #include "webserver.h"
 #include "bootProgress.h"
+#include "player.h"
 #include "ac_main.h" // needs to be included last
 
 #endif //ALARM_CLOCK_H
