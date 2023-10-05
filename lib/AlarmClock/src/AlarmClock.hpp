@@ -20,8 +20,8 @@ namespace AlarmClock {
         RTC_DS3231 rtc{};
         AsyncWebServer server{SERVER_PORT};
         LightSensor lightSensor{};
-        const LEDC indicatorLight{INDICATOR_LED_PIN, LEDC::Resolution::BITS_8};
-        const LEDC mainLight{LIGHT_PIN, LEDC::Resolution::BITS_3};
+        LEDC indicatorLight{INDICATOR_LED_PIN, LEDC::Resolution::BITS_8};
+        LEDC mainLight{LIGHT_PIN, LEDC::Resolution::BITS_3};
         MainLightDuration mainLightDuration{};
         Matrix32x8 matrix{SPI_CS_PIN, [this]() {
             return numToStr(now.hour()) + ':' +

@@ -19,6 +19,8 @@ class LEDC {
     const uint8_t pin;
     const uint8_t resolution;
     const uint8_t channel;
+    const uint32_t maxDuty{(uint32_t) (1 << resolution)};
+    uint32_t curDuty{0};
 
     /**
      * @brief Searches for a free LEDC channel and marks it as used.
@@ -84,19 +86,19 @@ public:
         channelsInUse &= ~(1 << channel);
     }
 
-    void setDuty(uint32_t duty) const { ledcWrite(channel, duty); }
+    void setDuty(uint32_t duty) { ledcWrite(channel, curDuty = duty % (maxDuty)); }
 
-    uint32_t getDuty() const { return ledcRead(channel); }
+    uint32_t getDuty() const { return curDuty; }
 
-    uint32_t getMaxDuty() const { return (1 << resolution) - 1; }
+    uint32_t getMaxDuty() const { return maxDuty; }
 
-    void toggleOff() const { ledcWrite(channel, 0); }
+    void toggleOff() { setDuty(0); }
 
-    void toggleOn() const { ledcWrite(channel, (1 << resolution) - 1); }
+    void toggleOn() { setDuty(maxDuty); }
 
-    void operator++() const { setDuty((ledcRead(channel) + 1) % (1 << resolution)); }
+    void operator++() { setDuty(getDuty() + 1); }
 
-    void operator--() const { setDuty((ledcRead(channel) - 1 + (1 << resolution)) % (1 << resolution)); }
+    void operator--() { setDuty(getDuty() + maxDuty - 1); }
 
     // disable copy constructor and assignment operator
 
