@@ -1,1 +1,0 @@
-This directory is intended to contain classes and functions that implement functionality that wraps and is specific to the ESP-32 platform. 

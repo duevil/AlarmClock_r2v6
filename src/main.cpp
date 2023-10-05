@@ -1,5 +1,5 @@
 #include <AlarmClock.h>
 
-void setup() { AlarmClock.setup(); }
+void setup() { AlarmClock::setup(); }
 
-void loop() { AlarmClock.loop(); }
+void loop() { AlarmClock::loop(); }

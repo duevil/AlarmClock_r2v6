@@ -1,1 +1,0 @@
-This directory is intended to contain classes and functions that implement basic and generic functionality that is not dependent on any specific hardware. 

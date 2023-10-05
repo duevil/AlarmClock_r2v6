@@ -1,1 +1,0 @@
-The base directory acting as a package for all classes and functions.

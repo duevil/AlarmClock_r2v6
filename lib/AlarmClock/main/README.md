@@ -1,1 +1,0 @@
-This directory is intended to contain the main classes and functions implementing the important functionality of the AlarmClock.

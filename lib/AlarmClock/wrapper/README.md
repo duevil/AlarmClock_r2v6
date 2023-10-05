@@ -1,1 +1,0 @@
-This directory is intended to contain classes and functions wrapping classes and functions from the other libraries like sensors or displays, making them easier to use in the AlarmClock application. 

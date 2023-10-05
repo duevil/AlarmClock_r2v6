@@ -1,0 +1,26 @@
+{
+  "name": "AlarmClock",
+  "version": "r2v6",
+  "authors": {
+    "name": "Malte Kasolowsky"
+  },
+  "dependencies": {
+    "BH1750 Light Sensor": "1.0.0",
+    "ESP32 Simple LEDC": "1.0.0",
+    "ESP32 Simple Timer": "1.0.0",
+    "ESP32 Touchpad": "1.0.0",
+    "MD Parola Matrix32x8": "1.0.0",
+    "adafruit/Adafruit BusIO": "1.14.4",
+    "adafruit/RTClib": "2.1.1",
+    "dfrobot/DFRobotDFPlayerMini": "1.0.6",
+    "bblanchon/ArduinoJson": "6.21.3",
+    "ESP Async WebServer": "https://github.com/me-no-dev/ESPAsyncWebServer",
+    "ayushsharma82/AsyncElegantOTA": "2.2.6"
+  },
+  "frameworks": [
+    "arduino"
+  ],
+  "platforms": [
+    "espressif32"
+  ]
+}
