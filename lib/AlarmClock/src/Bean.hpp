@@ -23,7 +23,7 @@ protected:
 
 public:
 
-    Bean(const char *name, Preferences &preferences): name(name), preferences(preferences) {}
+    Bean(const char *name, Preferences &preferences) : name(name), preferences(preferences) {}
 
     T get() const { return value; }
 

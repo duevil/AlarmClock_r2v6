@@ -8,6 +8,7 @@
 // external third party libraries
 #include <array>
 #include <memory>
+#include <random>
 #include <esp_sntp.h>
 #include <Arduino.h>
 #include <Preferences.h>
@@ -30,6 +31,7 @@
 #include "constants.h"
 #include "Bean.hpp"
 #include "MainLight.hpp"
+#include "Sound.hpp"
 #include "Player.hpp"
 #include "AlarmClock.hpp"
 // internal functions

@@ -37,6 +37,7 @@ namespace AlarmClock {
                 true,
                 [this]() { now = rtc.now(); }
         };
+        std::vector<Sound> sounds{};
 
 
     } AC{};

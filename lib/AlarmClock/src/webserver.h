@@ -35,20 +35,32 @@ namespace AlarmClock {
             request->send(response);
         }
 
-        void play(AsyncWebServerRequest * request) {
+        void play(AsyncWebServerRequest *request) {
             if (request->hasParam("sound")) {
                 auto sound = (uint8_t) request->getParam("sound")->value().toInt();
-                // TODO: check if sound is valid
-                // TODO: play sound
-                if (sound == 0) AC.player.play(1);
-                else AC.player.play(sound);
+                if (sound == 0) {
+                    auto rnd = (uint8_t) random(1, (long) AC.sounds.size() + 1);
+                    AC.player.play(rnd);
+                } else {
+                    auto itr = std::find_if(
+                            AC.sounds.begin(),
+                            AC.sounds.end(),
+                            [&sound](const Sound &s) { return s.getId() == sound; }
+                    );
+                    if (itr != AC.sounds.end()) {
+                        AC.player.play(sound);
+                    } else {
+                        request->send(404, "text/plain", "Sound not found");
+                        return;
+                    }
+                }
                 request->send(204);
             } else {
                 request->send(400, "text/plain", "Missing parameter");
             }
         }
 
-        void stop(AsyncWebServerRequest * request) {
+        void stop(AsyncWebServerRequest *request) {
             AC.player.stop();
             request->send(204);
         }
@@ -108,26 +120,26 @@ namespace AlarmClock {
         }
 
         void getSounds(AsyncWebServerRequest *request) {
-            auto *response = new AsyncJsonResponse();
+            auto *response = new AsyncJsonResponse(true, JSON_SOUNDS_BUF_SIZE);
             auto root = response->getRoot();
-            root.createNestedArray();
-            // TODO: sound data
+            Sound::soundsToJson(AC.sounds, root);
             response->setLength();
             request->send(response);
         }
 
         void getSound(AsyncWebServerRequest *request) {
             if (request->hasParam("id")) {
-                auto id = request->getParam("id")->value().toInt();
-                // TODO: check if id is valid
-                auto *response = new AsyncJsonResponse();
-                auto root = response->getRoot();
-                // TODO: sound data
-                root["id"] = id;
-                root["name"] = "na";
-                root["allowRandom"] = false;
-                response->setLength();
-                request->send(response);
+                auto id = (uint8_t) request->getParam("id")->value().toInt();
+                auto sPtr = Sound::getSoundById(id, AC.sounds);
+                if (sPtr != AC.sounds.end()) {
+                    auto *response = new AsyncJsonResponse();
+                    auto root = response->getRoot();
+                    sPtr->toJson(root);
+                    response->setLength();
+                    request->send(response);
+                } else {
+                    request->send(404, "text/plain", "Sound not found");
+                }
             } else {
                 request->send(400, "text/plain", "Missing parameter");
             }
@@ -176,27 +188,41 @@ namespace AlarmClock {
         }
 
         void putSounds(AsyncWebServerRequest *request, JsonVariant &json) {
-            // TODO: sounds data
+            AC.sounds = Sound::soundsFromJson(json);
+            Sound::saveSounds(JSON_SOUNDS_FILE_NAME, AC.sounds);
             request->send(204);
         }
 
         void putSound(AsyncWebServerRequest *request, JsonVariant &json) {
-            auto id = json["id"].as<uint8_t>();
-            // TODO: check if id is valid
-            // TODO: sound data
-            request->send(204);
+            auto sound = Sound::fromJson(json);
+            auto sPtr = Sound::getSoundById(sound.getId(), AC.sounds);
+            if (sPtr != AC.sounds.end()) {
+                *sPtr = sound;
+                Sound::saveSounds(JSON_SOUNDS_FILE_NAME, AC.sounds);
+                request->send(204);
+            } else {
+                request->send(404, "text/plain", "Sound not found");
+            }
         }
 
         void postSound(AsyncWebServerRequest *request, JsonVariant &json) {
-            // TODO: sound data
+            auto sound = Sound::fromJson(json);
+            if (sound.getId() != AC.sounds.size() + 1) {
+                request->send(400, "text/plain", "Invalid sound id");
+                return;
+            }
+            AC.sounds.push_back(sound);
             request->send(204);
         }
 
         void deleteSound(AsyncWebServerRequest *request) {
             if (request->hasParam("id")) {
-                auto id = request->getParam("id")->value().toInt();
-                // TODO: check if id is valid
-                // TODO: delete sound
+                auto id = (uint8_t) request->getParam("id")->value().toInt();
+                auto sPtr = Sound::getSoundById(id, AC.sounds);
+                if (sPtr != AC.sounds.end()) {
+                    AC.sounds.erase(sPtr);
+                    Sound::saveSounds(JSON_SOUNDS_FILE_NAME, AC.sounds);
+                }
                 request->send(204);
             } else {
                 request->send(400, "text/plain", "Missing parameter");
@@ -206,7 +232,6 @@ namespace AlarmClock {
         //#endregion
 
         void setup(AsyncWebServer &server) {
-            assert(SPIFFS.begin() && "SPIFFS failed to mount");
             server.serveStatic("/", SPIFFS, "/root_site/").setDefaultFile("index.html");
 
             // general GET
@@ -251,7 +276,7 @@ namespace AlarmClock {
             server.addHandler(postSoundHandler);
             server.on("/sound", HTTP_DELETE, deleteSound);
 
-    
+
             server.begin();
             AsyncElegantOTA.setID("AlarmClock");
             AsyncElegantOTA.begin(&server);

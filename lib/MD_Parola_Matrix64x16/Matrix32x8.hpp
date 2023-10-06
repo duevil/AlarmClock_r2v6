@@ -56,18 +56,20 @@ namespace md_parola_matrix32x8 {
          * @brief Sets up the matrix display.
          * Sets the font, text alignment, character spacing, scroll spacing and text effect.
          */
-        void setup() {
+        bool setup() {
             assert(!setupDone);
-            md.begin();
-            md.setIntensity(0);
-            md.setFont(matrix_font);
-            md.setTextAlignment(PA_CENTER);
-            md.setCharSpacing(0);
-            md.setScrollSpacing(SCROLL_SPACING);
-            md.setTextEffect(PA_NO_EFFECT, PA_NO_EFFECT);
-            md.displayReset();
-            md.displayClear();
-            setupDone = true;
+            if (md.begin()) {
+                md.setIntensity(0);
+                md.setFont(matrix_font);
+                md.setTextAlignment(PA_CENTER);
+                md.setCharSpacing(0);
+                md.setScrollSpacing(SCROLL_SPACING);
+                md.setTextEffect(PA_NO_EFFECT, PA_NO_EFFECT);
+                md.displayReset();
+                md.displayClear();
+                return setupDone = true;
+            }
+            return false;
         }
 
         /**

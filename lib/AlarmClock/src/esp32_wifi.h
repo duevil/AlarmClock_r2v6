@@ -87,7 +87,7 @@ namespace AlarmClock {
          * @param tz The timezone to use
          */
         template<typename NTPCallback>
-        void setupNTP(NTPCallback ntpCallback, const char* tz) {
+        void setupNTP(NTPCallback ntpCallback, const char *tz) {
             sntp_set_time_sync_notification_cb(ntpCallback);
             configTzTime(tz, NTP_SERVER_1, NTP_SERVER_2, NTP_SERVER_3);
         }

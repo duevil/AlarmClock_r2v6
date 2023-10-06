@@ -15,21 +15,23 @@ namespace AlarmClock {
         Serial.begin(SERIAL_BAUD);
         bootProgress(BootState::Start);
 
+        assert(SPIFFS.begin() && "SPIFFS failed to mount");
+
         AC.preferences.begin(PREFERENCES_NAMESPACE);
         AC.mainLight.setup();
 
         bootProgress(BootState::Matrix);
-        AC.matrix.setup();
+        assert(AC.matrix.setup() && "Matrix failed to initialize");
 
         bootProgress(BootState::RTC);
-        rtc::setup();
+        assert(rtc::setup() && "RTC failed to initialize");
         AC.rtcTimer.start();
 
         bootProgress(BootState::Navigation);
         navigation::setup();
 
         bootProgress(BootState::WiFi);
-        esp32_wifi::setup([]() { bootProgress(BootState::SmartConfig); });
+        assert(esp32_wifi::setup([]() { bootProgress(BootState::SmartConfig); }) && "WiFi failed to initialize");
 
         bootProgress(BootState::NTP);
         AC.tz.load();
@@ -39,13 +41,15 @@ namespace AlarmClock {
         webserver::setup();
 
         bootProgress(BootState::LightSensor);
-        AC.lightSensor.setup();
+        assert(AC.lightSensor.setup() && "Light sensor failed to initialize");
 
         bootProgress(BootState::LEDC);
         AC.indicatorLight.setup();
 
         bootProgress(BootState::Player);
-        AC.player.setup();
+        assert(AC.player.setup() && "Player failed to initialize");
+
+        AC.sounds = Sound::loadSounds(JSON_SOUNDS_FILE_NAME);
 
         bootProgress(BootState::Done);
     }
@@ -84,7 +88,7 @@ namespace AlarmClock {
             auto value = AC.lightSensor.getValue();
             if (lightLevel != 0 && value == 0) illuminateMatrix();
             lightLevel = value;
-            matrix.setBrightness((uint8_t)(0.1005 * lightLevel - 0.05));
+            matrix.setBrightness((uint8_t) (0.1005 * lightLevel - 0.05));
             matrix.shutdown(lightLevel == 0 && !matrixIlluminate && !mainLight.getDuty());
         }
 
