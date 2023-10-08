@@ -31,14 +31,17 @@ namespace AlarmClock {
         }
 
         uint8_t getVolume() {
-            auto v = (uint8_t) player.readVolume();
-            assert(v == (uint8_t) volume && "Volume mismatch");
-            return v;
+            // readVolume() is not working
+            // auto v = (uint8_t) player.readVolume();
+            // assert(v == (uint8_t) volume && "Volume mismatch");
+            return (uint8_t) volume;
         }
 
         void setVolume(uint8_t v) { player.volume(min((uint8_t) (volume = v), (uint8_t) 30)); }
 
         void play(uint8_t sound) { player.play(max(sound, (uint8_t) 1)); }
+
+        void playLoop(uint8_t sound) { player.loop(max(sound, (uint8_t) 1)); }
 
         void stop() { player.stop(); }
 

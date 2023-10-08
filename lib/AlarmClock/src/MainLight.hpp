@@ -29,7 +29,7 @@ namespace AlarmClock {
         }
 
         void toggleOn() {
-            timer.start();
+            if ((uint8_t) duration) timer.reset();
             mainLight.toggleOn();
         }
 
@@ -40,26 +40,26 @@ namespace AlarmClock {
 
         void setDuration(uint8_t min) {
             duration = min;
-            timer.changePeriod(min * 60 * 1000);
+            if (min > 0) timer.changePeriod(min * 60 * 1000);
         }
 
         uint8_t getDuration() const { return (uint8_t) duration; }
 
         void setDuty(uint8_t duty) {
             mainLight.setDuty(duty);
-            if (duty) timer.start();
+            if (duty && (uint8_t) duration) timer.reset();
             else timer.stop();
         }
 
         void incrDuty() {
             ++mainLight;
-            if (mainLight.getDuty()) timer.start();
+            if (mainLight.getDuty() && (uint8_t) duration) timer.reset();
             else timer.stop();
         }
 
         void decrDuty() {
             --mainLight;
-            if (mainLight.getDuty()) timer.start();
+            if (mainLight.getDuty() && (uint8_t) duration) timer.reset();
             else timer.stop();
         }
 

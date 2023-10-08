@@ -24,7 +24,7 @@ namespace AlarmClock {
         }
 
         void getOnTime(AsyncWebServerRequest *request) {
-            request->send(200, "text/plain", String(millis()));
+            request->send(200, "text/plain", String(millis() / 1000));
         }
 
         void getLightSensor(AsyncWebServerRequest *request) {
@@ -82,20 +82,19 @@ namespace AlarmClock {
         void getAlarm(AsyncWebServerRequest *request) {
             if (request->hasParam("id")) {
                 auto id = request->getParam("id")->value().toInt();
-                if (id != 1 && id != 2) {
-                    request->send(404, "text/plain", "Invalid alarm id");
-                    return;
-                }
                 auto *response = new AsyncJsonResponse();
                 auto root = response->getRoot();
-                // TODO: alarm data
-                root["id"] = id;
-                root["hour"] = 0;
-                root["minute"] = 0;
-                root["repeat"] = 0;
-                root["toggle"] = false;
-                root["sound"] = 0;
-                root["nextDateTime"] = 0;
+                switch (id) {
+                    case 1:
+                        alarmToJson(AC.alarm1, root, AC.now);
+                        break;
+                    case 2:
+                        alarmToJson(AC.alarm2, root, AC.now);
+                        break;
+                    default:
+                        request->send(404, "text/plain", "Invalid alarm id");
+                        return;
+                }
                 response->setLength();
                 request->send(response);
             } else {
@@ -150,22 +149,36 @@ namespace AlarmClock {
 
         void putAlarm(AsyncWebServerRequest *request, JsonVariant &json) {
             auto id = json["id"].as<uint8_t>();
-            if (id != 1 && id != 2) {
-                request->send(404, "text/plain", "Invalid alarm id");
-                return;
+            switch (id) {
+                case 1:
+                    alarmFromJson(AC.alarm1, json);
+                    setAlarm(AC.alarm1, AC.rtc);
+                    break;
+                case 2:
+                    alarmFromJson(AC.alarm2, json);
+                    setAlarm(AC.alarm2, AC.rtc);
+                    break;
+                default:
+                    request->send(404, "text/plain", "Invalid alarm id");
+                    return;
             }
-            // TODO: alarm data
             request->send(204);
         }
 
         void putAlarmIn8h(AsyncWebServerRequest *request) {
             if (request->hasParam("id")) {
                 auto id = request->getParam("id")->value().toInt();
-                if (id != 1 && id != 2) {
-                    request->send(404, "text/plain", "Invalid alarm id");
-                    return;
+                switch (id) {
+                    case 1:
+                        setIn8hFromNow(AC.alarm1, AC.now);
+                        break;
+                    case 2:
+                        setIn8hFromNow(AC.alarm2, AC.now);
+                        break;
+                    default:
+                        request->send(404, "text/plain", "Invalid alarm id");
+                        return;
                 }
-                // TODO: set alarm in 8h
                 request->send(204);
             } else {
                 request->send(400, "text/plain", "Missing parameter");
@@ -180,7 +193,7 @@ namespace AlarmClock {
         void putPlayer(AsyncWebServerRequest *request, JsonVariant &json) {
             auto volume = json["volume"].as<uint8_t>();
             if (volume > 30) {
-                request->send(400, "text/plain", "Invalid must be between 0 and 30");
+                request->send(400, "text/plain", "Invalid must, be between 0 and 30");
                 return;
             }
             AC.player.setVolume(volume);
@@ -258,7 +271,7 @@ namespace AlarmClock {
             auto putAlarmHandler = new AsyncCallbackJsonWebHandler("/alarm", putAlarm);
             putAlarmHandler->setMethod(HTTP_PUT);
             server.addHandler(putAlarmHandler);
-            server.on("/alarm_in_8h", HTTP_PUT, putAlarmIn8h);
+            server.on("/alarm/in8h", HTTP_PUT, putAlarmIn8h);
             auto putLightHandler = new AsyncCallbackJsonWebHandler("/light", putLight);
             putLightHandler->setMethod(HTTP_PUT);
             server.addHandler(putLightHandler);

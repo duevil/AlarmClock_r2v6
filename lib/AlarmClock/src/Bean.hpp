@@ -29,7 +29,10 @@ public:
 
     void set(T val) { put(preferences, name, value = val); }
 
-    void load() { value = get(preferences, name); }
+    void load() {
+        if (preferences.isKey(name)) value = get(preferences, name);
+        else put(preferences, name, value);
+    }
 
     void reset() { preferences.remove(name); }
 
@@ -43,11 +46,11 @@ public:
 class Uint8Bean : public Bean<uint8_t> {
 
     uint8_t get(Preferences &preferences, const char *name) override {
-        return preferences.getUChar(name, 0);
+        return preferences.getUChar(name);
     }
 
     void put(Preferences &preferences, const char *name, uint8_t value) override {
-        preferences.putUInt(name, value);
+        assert(preferences.putUChar(name, value));
     }
 
 public:
@@ -64,11 +67,11 @@ public:
 class BoolBean : public Bean<bool> {
 
     bool get(Preferences &preferences, const char *name) override {
-        return preferences.getBool(name, false);
+        return preferences.getBool(name);
     }
 
     void put(Preferences &preferences, const char *name, bool value) override {
-        preferences.putBool(name, value);
+        assert(preferences.putBool(name, value));
     }
 
 public:
@@ -85,11 +88,11 @@ public:
 class StringBean : public Bean<String> {
 
     String get(Preferences &preferences, const char *name) override {
-        return preferences.getString(name, "");
+        return preferences.getString(name);
     }
 
     void put(Preferences &preferences, const char *name, String value) override {
-        preferences.putString(name, value);
+        assert(preferences.putString(name, value));
     }
 
 public:

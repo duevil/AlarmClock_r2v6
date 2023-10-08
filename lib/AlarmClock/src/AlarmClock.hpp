@@ -38,7 +38,9 @@ namespace AlarmClock {
                 [this]() { now = rtc.now(); }
         };
         std::vector<Sound> sounds{};
-
+        Alarm alarm1{N::ONE, preferences};
+        Alarm alarm2{N::TWO, preferences};
+        volatile bool anyAlarmTriggered{false};
 
     } AC{};
 

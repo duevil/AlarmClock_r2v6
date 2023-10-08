@@ -8,6 +8,31 @@
 
 namespace AlarmClock {
 
+    void alarmHandler() {
+        static ESP32_Timer turnOffTimer{
+                "Turn Off Timer",
+                30 * 60 * 1000 /* 30 min */,
+                false,
+                []() {
+                    AC.player.stop();
+                    AC.indicatorLight.toggleOff();
+                }
+        };
+        if (readAlarm(AC.alarm1, AC.rtc)) {
+            auto sound = (uint8_t) AC.alarm1.sound;
+            if (sound == 0) AC.player.playLoop(Sound::findRandomSound(AC.sounds).getId());
+            else AC.player.playLoop(sound);
+        }
+        if (readAlarm(AC.alarm2, AC.rtc)) {
+            auto sound = (uint8_t) AC.alarm2.sound;
+            if (sound == 0) AC.player.playLoop(Sound::findRandomSound(AC.sounds).getId());
+            else AC.player.playLoop(sound);
+        }
+        turnOffTimer.start();
+        AC.indicatorLight.toggleOn();
+        AC.mainLight.toggleOn();
+    }
+
     /**
      * The main setup of the alarm clock; sets up the alarm clock and all its components
      */
@@ -17,7 +42,7 @@ namespace AlarmClock {
 
         assert(SPIFFS.begin() && "SPIFFS failed to mount");
 
-        AC.preferences.begin(PREFERENCES_NAMESPACE);
+        assert(AC.preferences.begin(PREFERENCES_NAMESPACE));
         AC.mainLight.setup();
 
         bootProgress(BootState::Matrix);
@@ -26,6 +51,7 @@ namespace AlarmClock {
         bootProgress(BootState::RTC);
         assert(rtc::setup() && "RTC failed to initialize");
         AC.rtcTimer.start();
+        rtc::attachInterrupt(RTC_SQW_PIN, [](){ AC.anyAlarmTriggered = true; });
 
         bootProgress(BootState::Navigation);
         navigation::setup();
@@ -50,6 +76,11 @@ namespace AlarmClock {
         assert(AC.player.setup() && "Player failed to initialize");
 
         AC.sounds = Sound::loadSounds(JSON_SOUNDS_FILE_NAME);
+
+        setupAlarm(AC.alarm1);
+        setupAlarm(AC.alarm2);
+        setAlarm(AC.alarm1, AC.rtc);
+        setAlarm(AC.alarm2, AC.rtc);
 
         bootProgress(BootState::Done);
     }
@@ -76,6 +107,12 @@ namespace AlarmClock {
         };
 
         matrix.loop();
+
+        // alarm handler
+        if (AC.anyAlarmTriggered) {
+            alarmHandler();
+            AC.anyAlarmTriggered = false;
+        }
 
         // callback to illuminate the matrix
         auto illuminateMatrix = []() {
@@ -104,8 +141,33 @@ namespace AlarmClock {
         } else {
             switch (navDir) {
                 case navigation::Direction::Center:
-                    if (AC.indicatorLight.getDuty()) AC.indicatorLight.toggleOff();
-                    else AC.indicatorLight.toggleOn();
+                    if (AC.alarm1.state == AlarmState::PLAYING || AC.alarm2.state == AlarmState::PLAYING) {
+                        // TODO: implement snooze time setting
+                        // TODO: implement snooze ui
+                        if (AC.alarm1.state == AlarmState::PLAYING) {
+                            AC.alarm1.state = AlarmState::SNOOZE;
+                            snoozeAlarm(AC.alarm1, AC.rtc, 5);
+                        }
+                        if (AC.alarm2.state == AlarmState::PLAYING) {
+                            AC.alarm2.state = AlarmState::SNOOZE;
+                            snoozeAlarm(AC.alarm2, AC.rtc, 5);
+                        }
+                        AC.player.stop();
+                        AC.indicatorLight.setDuty(AC.indicatorLight.getMaxDuty() / 3);
+                    }
+                    else if (AC.alarm1.state == AlarmState::SNOOZE || AC.alarm2.state == AlarmState::SNOOZE) {
+                        if (AC.alarm1.state == AlarmState::SNOOZE) {
+                            AC.alarm1.state = AlarmState::OFF;
+                            if ((uint8_t) AC.alarm1.repeat) setAlarm(AC.alarm1, AC.rtc);
+                            else disableAlarm(AC.alarm1, AC.rtc);
+                        }
+                        if (AC.alarm2.state == AlarmState::SNOOZE) {
+                            AC.alarm2.state = AlarmState::OFF;
+                            if ((uint8_t) AC.alarm2.repeat) setAlarm(AC.alarm2, AC.rtc);
+                            else disableAlarm(AC.alarm2, AC.rtc);
+                        }
+                        AC.indicatorLight.toggleOff();
+                    }
                     break;
                 case navigation::Direction::Left:
                     matrix.scrollPrev();

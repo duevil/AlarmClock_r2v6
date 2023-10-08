@@ -7,6 +7,8 @@
 
 // external third party libraries
 #include <array>
+#include <utility>
+#include <vector>
 #include <memory>
 #include <random>
 #include <esp_sntp.h>
@@ -33,6 +35,7 @@
 #include "MainLight.hpp"
 #include "Sound.hpp"
 #include "Player.hpp"
+#include "alarm.h"
 #include "AlarmClock.hpp"
 // internal functions
 #include "navigation.h"

@@ -1,5 +1,3 @@
-#include <utility>
-
 //
 // Created by Malte on 06.10.2023.
 //
@@ -42,7 +40,6 @@ namespace AlarmClock {
                 soundJson["name"] = sound.name;
                 soundJson["allowRandom"] = sound.allowRandom;
             }
-            serializeJson(json, Serial);
         }
 
         static std::vector<Sound> soundsFromJson(JsonVariant &json) {
@@ -86,34 +83,31 @@ namespace AlarmClock {
         }
 
         static const Sound &findRandomSound(std::vector<Sound> &sounds) {
-            std::vector<Sound> entries{};
-            std::copy_if(
-                    sounds.begin(),
-                    sounds.end(),
-                    std::back_inserter(entries),
-                    [](const Sound &sound) { return sound.allowRandom && !sound.played; }
-            );
-            if (entries.empty()) {
-                std::for_each(sounds.begin(), sounds.end(), [](Sound &sound) { sound.played = false; });
-                std::copy_if(
-                        sounds.begin(),
-                        sounds.end(),
-                        std::back_inserter(entries),
-                        [](const Sound &sound) { return sound.allowRandom && !sound.played; }
-                );
-            }
-            std::random_device rd{};
+            std::random_device rd;
             std::mt19937 gen(rd());
-            std::uniform_int_distribution<> dis(0, (int) entries.size() - 1);
-            auto selected = std::find_if(
-                    sounds.begin(),
-                    sounds.end(),
-                    [&entries, &dis, &gen](Sound &sound) {
-                        return sound.getId() == entries[dis(gen)].getId();
+
+            std::vector<int> validIndices;
+            for (int i = 0; i < sounds.size(); ++i) {
+                if (sounds[i].allowRandom && !sounds[i].played) {
+                    validIndices.push_back(i);
+                }
+            }
+
+            if (validIndices.empty()) {
+                for (int i = 0; i < sounds.size(); ++i) {
+                    if (sounds[i].allowRandom) {
+                        sounds[i].played = false;
+                        validIndices.push_back(i);
                     }
-            );
-            assert(selected != sounds.end() && "No random sound found");
-            selected->played = true;
+                }
+            }
+
+            std::uniform_int_distribution<int> dist(0, (int) validIndices.size() - 1);
+            auto randomIndex = dist(gen);
+
+            auto selectedSoundIndex = validIndices[randomIndex];
+            sounds[selectedSoundIndex].played = true;
+            return sounds[selectedSoundIndex];
         }
 
     };
