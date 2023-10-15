@@ -9,17 +9,21 @@
 namespace AlarmClock {
     namespace esp32_wifi {
 
+        /**
+         * @brief Start SmartConfig and wait for it to finish
+         * @return whether SmartConfig was successful
+         */
         bool smartConfig() {
-            WiFiClass::mode(WIFI_AP_STA);
-            auto result = WiFi.beginSmartConfig();
-            assert(result && "WiFi failed to start SmartConfig");
+            assert(WiFi.beginSmartConfig() && "WiFi failed to start SmartConfig");
             auto i = 0;
             while (!WiFi.smartConfigDone()) {
                 delay(500);
                 if (i++ > 30) { // 15 seconds
+                    assert(WiFi.stopSmartConfig() && "WiFi failed to stop SmartConfig");
                     return false;
                 }
             }
+            assert(WiFi.stopSmartConfig() && "WiFi failed to stop SmartConfig");
             return true;
         }
 
@@ -45,7 +49,7 @@ namespace AlarmClock {
          */
         template<typename SmartConfigStartCallback>
         bool setup(SmartConfigStartCallback smartConfigStartCallback) {
-            static ESP32_Timer connectionTimer{
+            static const ESP32_Timer connectionTimer{
                     "WiFi Connection Timer",
                     1800000 /* 30 minutes */,
                     true,
@@ -91,6 +95,12 @@ namespace AlarmClock {
             sntp_set_time_sync_notification_cb(ntpCallback);
             configTzTime(tz, NTP_SERVER_1, NTP_SERVER_2, NTP_SERVER_3);
         }
+
+        /**
+         * @brief Get the IP address of the device
+         * @return The IP address of the device
+         */
+        String getIP() { return WiFi.localIP().toString(); }
     }
 }
 

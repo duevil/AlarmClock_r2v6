@@ -5,8 +5,6 @@
 #ifndef ALARM_CLOCK_WEBSERVER_H
 #define ALARM_CLOCK_WEBSERVER_H
 
-// TODO: test API endpoints
-
 
 namespace AlarmClock {
     namespace webserver {

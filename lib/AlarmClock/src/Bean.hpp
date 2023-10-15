@@ -5,6 +5,8 @@
 #ifndef ALARM_CLOCK_BEAN_HPP
 #define ALARM_CLOCK_BEAN_HPP
 
+// TODO: comment
+
 
 template<typename T>
 class Bean {
@@ -17,9 +19,9 @@ protected:
 
     virtual ~Bean() = default;
 
-    virtual T get(Preferences &, const char *) = 0;
+    virtual T get(Preferences &, const char *) const = 0;
 
-    virtual void put(Preferences &, const char *, T) = 0;
+    virtual void put(Preferences &, const char *, T) const = 0;
 
 public:
 
@@ -45,11 +47,11 @@ public:
 
 class Uint8Bean : public Bean<uint8_t> {
 
-    uint8_t get(Preferences &preferences, const char *name) override {
+    uint8_t get(Preferences &preferences, const char *name) const override {
         return preferences.getUChar(name);
     }
 
-    void put(Preferences &preferences, const char *name, uint8_t value) override {
+    void put(Preferences &preferences, const char *name, uint8_t value) const override {
         assert(preferences.putUChar(name, value));
     }
 
@@ -66,11 +68,11 @@ public:
 
 class BoolBean : public Bean<bool> {
 
-    bool get(Preferences &preferences, const char *name) override {
+    bool get(Preferences &preferences, const char *name) const override {
         return preferences.getBool(name);
     }
 
-    void put(Preferences &preferences, const char *name, bool value) override {
+    void put(Preferences &preferences, const char *name, bool value) const override {
         assert(preferences.putBool(name, value));
     }
 
@@ -87,11 +89,11 @@ public:
 
 class StringBean : public Bean<String> {
 
-    String get(Preferences &preferences, const char *name) override {
+    String get(Preferences &preferences, const char *name) const override {
         return preferences.getString(name);
     }
 
-    void put(Preferences &preferences, const char *name, String value) override {
+    void put(Preferences &preferences, const char *name, String value) const override {
         assert(preferences.putString(name, value));
     }
 

@@ -16,7 +16,7 @@ class AveragedValue {
 
 private:
     T value{};
-    std::array<T, n> values{};
+    std::array <T, n> values{};
     size_t initialReads{n};
 
 public:
@@ -25,7 +25,7 @@ public:
     /**
      * @return the current average
      */
-     T get() const { return value; }
+    T get() const { return value; }
 
     /**
      * Updates the average with a new value.
@@ -50,14 +50,14 @@ public:
      * Implicit conversion to the current average.
      * @return the current average
      */
-     operator T() const { return get(); } // NOLINT(google-explicit-constructor)
+    operator T() const { return get(); } // NOLINT(google-explicit-constructor)
 
     /**
      * Updates the average with a new value.
      * @param newValue the new value
      * @return the current average
      */
-     AveragedValue &operator=(T newValue) {
+    AveragedValue &operator=(T newValue) {
         update(newValue);
         return *this;
     }

@@ -46,11 +46,12 @@ public:
         return false;
     }
 
-     float getValue() { return value; }
+    float getValue() { return value; }
 
     // delete copy constructor and assignment operator
 
     LightSensor(const LightSensor &o) = delete;
+
     LightSensor &operator=(const LightSensor &o) = delete;
 
 private:

@@ -34,7 +34,7 @@ namespace AlarmClock {
      * PLAYING - The alarm is playing
      */
     enum class AlarmState {
-        OFF = 0, SNOOZE = 1, PLAYING = 2
+        OFF = 0, SNOOZED = 1, PLAYING = 2
     };
 
 
@@ -58,6 +58,12 @@ namespace AlarmClock {
                 repeat{n == N::ONE ? "A1R" : "A2R", preferences},
                 toggle{n == N::ONE ? "A1T" : "A2T", preferences},
                 sound{n == N::ONE ? "A1S" : "A2S", preferences} {}
+
+        // deleted copy constructor and assignment operator
+
+        Alarm(const Alarm &) = delete;
+
+        Alarm &operator=(const Alarm &) = delete;
     };
 
 
@@ -124,8 +130,8 @@ namespace AlarmClock {
         auto alarmTime = now + TimeSpan(0, 8, 0, 0);
         alarm.hour = alarmTime.hour();
         alarm.minute = alarmTime.minute();
-        alarm.repeat =(uint8_t) alarm.repeat == 0 ? 0
-                : (uint8_t) ((uint8_t) alarm.repeat | 1 << alarmTime.dayOfTheWeek());
+        alarm.repeat = (uint8_t) alarm.repeat == 0 ? 0
+                                                   : (uint8_t) ((uint8_t) alarm.repeat | 1 << alarmTime.dayOfTheWeek());
         alarm.toggle = true;
         return alarm;
     }
@@ -236,7 +242,7 @@ namespace AlarmClock {
                 break;
         }
         if (success) {
-            alarm.state = AlarmState::SNOOZE;
+            alarm.state = AlarmState::SNOOZED;
             return true;
         }
         return false;

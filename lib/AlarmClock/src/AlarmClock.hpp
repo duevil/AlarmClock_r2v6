@@ -10,8 +10,16 @@ namespace AlarmClock {
 
     struct {
 
+        volatile bool anyAlarmTriggered{false};
         float lightLevel{0.0f};
+        bool uiActive{false};
         DateTime now{};
+        std::array<uint8_t, 6> defuseCode{};
+        std::vector<Sound> sounds{};
+        Alarm alarm1{N::ONE, preferences};
+        Alarm alarm2{N::TWO, preferences};
+        uint8_t snoozeTime{0};
+        N alarmToSet{N::ONE};
         StringBean tz{"timeZone", preferences};
         Preferences preferences{};
         RTC_DS3231 rtc{};
@@ -24,23 +32,18 @@ namespace AlarmClock {
                    numToStr(now.minute()) + " " +
                    numToStr(now.second(), 2, true);
         }, [this]() {
-            return numToStr(lightLevel, 4) + " lx";
-        }, [this]() {
             char dateStr[] = " DD. MMM";
             now.toString(dateStr);
             return std::string{dateStr};
         }};
         Player player{preferences};
-        ESP32_Timer rtcTimer{
-                "RTC Timer",
-                1000,
-                true,
-                [this]() { now = rtc.now(); }
+        UIDisplay ui{OLED_ADDRESS, I2C_SDA_PIN, I2C_SCL_PIN};
+        const ESP32_Timer uiTimer{
+                "UI Timer",
+                15000,
+                false,
+                [this]() { ui.transitionToFrame(0); }
         };
-        std::vector<Sound> sounds{};
-        Alarm alarm1{N::ONE, preferences};
-        Alarm alarm2{N::TWO, preferences};
-        volatile bool anyAlarmTriggered{false};
 
     } AC{};
 

@@ -8,6 +8,9 @@
 
 namespace AlarmClock {
 
+    /**
+     * @brief Class that represents a sound
+     */
     class Sound {
 
         uint8_t id;
@@ -23,16 +26,34 @@ namespace AlarmClock {
 
         String getName() const { return name; }
 
+        bool isAllowRandom() const { return allowRandom; }
+
+        void setAllowRandom(bool value) { allowRandom = value; }
+
+        /**
+         * @brief Creates JSON data from the sound
+         * @param json The JSON object to create the JSON data in
+         */
         void toJson(JsonVariant &json) const {
             json["id"] = id;
             json["name"] = name;
             json["allowRandom"] = allowRandom;
         }
 
+        /**
+         * @brief Creates a sound from the given JSON data
+         * @param json The JSON data to create the sound from
+         * @return The sound created from the given JSON data
+         */
         static Sound fromJson(JsonVariant &json) {
             return {json["id"], json["name"], json["allowRandom"]};
         }
 
+        /**
+         * @brief Creates JSON data from the given sounds
+         * @param sounds The sounds to create JSON data from
+         * @param json The JSON object to create the JSON data in
+         */
         static void soundsToJson(std::vector<Sound> &sounds, JsonVariant &json) {
             for (auto &sound: sounds) {
                 JsonVariant soundJson = json.createNestedObject();
@@ -42,6 +63,11 @@ namespace AlarmClock {
             }
         }
 
+        /**
+         * @brief Creates a vector of sounds from the given JSON data
+         * @param json The JSON data to create the sounds from
+         * @return The sounds created from the given JSON data
+         */
         static std::vector<Sound> soundsFromJson(JsonVariant &json) {
             std::vector<Sound> sounds;
             auto array = json.as<JsonArray>();
@@ -51,6 +77,11 @@ namespace AlarmClock {
             return sounds;
         }
 
+        /**
+         * @brief Loads the sounds from the given file on the SPIFFS filesystem as JSON data
+         * @param fileName The name of the file to load the sounds from
+         * @return The sounds loaded from the given file
+         */
         static std::vector<Sound> loadSounds(const char *fileName) {
             auto file = SPIFFS.open(fileName);
             if (!file) return {};
@@ -62,6 +93,11 @@ namespace AlarmClock {
             return soundsFromJson(json);
         }
 
+        /**
+         * @brief Saves the given sounds as JSON data to the given file on the SPIFFS filesystem
+         * @param fileName The name of the file to save the sounds to
+         * @param sounds The sounds to save
+         */
         static void saveSounds(const char *fileName, std::vector<Sound> &sounds) {
             auto file = SPIFFS.open(fileName, FILE_WRITE);
             assert(file && "Failed to open sounds file");
@@ -72,6 +108,12 @@ namespace AlarmClock {
             file.close();
         }
 
+        /**
+         * @brief Returns an iterator to the sound with the given id
+         * @param id The id of the sound to search for
+         * @param sounds The sounds to search in
+         * @return An iterator to the sound with the given id
+         */
         static __gnu_cxx::__normal_iterator<Sound *, std::vector<Sound>>
         getSoundById(uint8_t id, std::vector<Sound> &sounds) {
             auto sound = std::find_if(
@@ -82,10 +124,14 @@ namespace AlarmClock {
             return sound;
         }
 
+        /**
+         * @brief Finds a random sound that is allowed to be played randomly and has not been played yet\n
+         * If no such sound exists, all sounds that are allowed to be played randomly are reset and a random sound is
+         * returned. The sound that is returned is marked as played.
+         * @param sounds The sounds to search in
+         * @return A random sound that is allowed to be played randomly and has not been played yet
+         */
         static const Sound &findRandomSound(std::vector<Sound> &sounds) {
-            std::random_device rd;
-            std::mt19937 gen(rd());
-
             std::vector<int> validIndices;
             for (int i = 0; i < sounds.size(); ++i) {
                 if (sounds[i].allowRandom && !sounds[i].played) {
@@ -102,9 +148,7 @@ namespace AlarmClock {
                 }
             }
 
-            std::uniform_int_distribution<int> dist(0, (int) validIndices.size() - 1);
-            auto randomIndex = dist(gen);
-
+            auto randomIndex = random((long) validIndices.size());
             auto selectedSoundIndex = validIndices[randomIndex];
             sounds[selectedSoundIndex].played = true;
             return sounds[selectedSoundIndex];

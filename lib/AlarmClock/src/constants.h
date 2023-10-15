@@ -18,6 +18,7 @@ constexpr auto TOUCHPAD_UP_PIN = 32;
 constexpr auto TOUCHPAD_DOWN_PIN = 33;
 constexpr auto SERVER_PORT = 8181;
 constexpr auto JSON_SOUNDS_BUF_SIZE = 8192;
+constexpr auto OLED_ADDRESS = 0x3C;
 constexpr auto JSON_SOUNDS_FILE_NAME = "/sounds.json";
 constexpr auto NTP_SERVER_1 = "pool.ntp.org";
 constexpr auto NTP_SERVER_2 = "time.nist.gov";

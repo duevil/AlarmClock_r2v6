@@ -1,0 +1,15 @@
+{
+  "name": "User Interface",
+  "version": "1.0.0",
+  "authors": {
+    "name": "Malte Kasolowsky"
+  },
+  "dependencies": {
+    "thingpulse/ESP8266 and ESP32 OLED driver for SSD1306 displays": "4.4.0"
+  },
+  "frameworks": [
+    "arduino"
+  ],
+  "platforms": [
+  ]
+}

@@ -6,6 +6,7 @@
 #define MD_PAROLA_MATRIX_32X8_H
 
 #if __cplusplus >= 201103L
+
 #include <Arduino.h>
 #include <vector>
 #include <functional>
@@ -15,6 +16,7 @@
 #include "text_utils.h"
 #include "matrix_font.h"
 #include "Matrix32x8.hpp"
+
 using md_parola_matrix32x8::Matrix32x8;
 #else
 #error "This library requires C++11 or higher"

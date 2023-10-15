@@ -5,84 +5,99 @@
 #ifndef ALARM_CLOCK_MAIN_H
 #define ALARM_CLOCK_MAIN_H
 
+#define FRAME_CALLBACK(f) [](OLEDDisplay*d,OLEDDisplayUiState*s,int16_t x,int16_t y){f({d,s,x,y});}
+
 
 namespace AlarmClock {
-
-    void alarmHandler() {
-        static ESP32_Timer turnOffTimer{
-                "Turn Off Timer",
-                30 * 60 * 1000 /* 30 min */,
-                false,
-                []() {
-                    AC.player.stop();
-                    AC.indicatorLight.toggleOff();
-                }
-        };
-        if (readAlarm(AC.alarm1, AC.rtc)) {
-            auto sound = (uint8_t) AC.alarm1.sound;
-            if (sound == 0) AC.player.playLoop(Sound::findRandomSound(AC.sounds).getId());
-            else AC.player.playLoop(sound);
-        }
-        if (readAlarm(AC.alarm2, AC.rtc)) {
-            auto sound = (uint8_t) AC.alarm2.sound;
-            if (sound == 0) AC.player.playLoop(Sound::findRandomSound(AC.sounds).getId());
-            else AC.player.playLoop(sound);
-        }
-        turnOffTimer.start();
-        AC.indicatorLight.toggleOn();
-        AC.mainLight.toggleOn();
-    }
 
     /**
      * The main setup of the alarm clock; sets up the alarm clock and all its components
      */
     void setup() {
-        Serial.begin(SERIAL_BAUD);
-        bootProgress(BootState::Start);
+        static const ESP32_Timer rtcTimer{
+                "RTC Timer",
+                1000,
+                true,
+                []() {
+                    auto dt = AC.rtc.now();
+                    if (dt.isValid()) AC.now = dt;
+                }
+        };
 
+        auto &ui = AC.ui;
+        ui.setup();
+        ui.drawBootAnimation(0, "Booting");
+
+        ui.drawBootAnimation(5, "Mounting SPIFFS");
         assert(SPIFFS.begin() && "SPIFFS failed to mount");
 
+        ui.drawBootAnimation(10, "Loading preferences");
         assert(AC.preferences.begin(PREFERENCES_NAMESPACE));
-        AC.mainLight.setup();
 
-        bootProgress(BootState::Matrix);
+        ui.drawBootAnimation(15, "Initializing Matrix");
         assert(AC.matrix.setup() && "Matrix failed to initialize");
+        AC.matrix.overrideText("Booting");
 
-        bootProgress(BootState::RTC);
+        ui.drawBootAnimation(20, "Initializing RTC");
         assert(rtc::setup() && "RTC failed to initialize");
-        AC.rtcTimer.start();
-        rtc::attachInterrupt(RTC_SQW_PIN, [](){ AC.anyAlarmTriggered = true; });
+        rtcTimer.start();
+        rtc::attachInterrupt(RTC_SQW_PIN, []() { AC.anyAlarmTriggered = true; });
 
-        bootProgress(BootState::Navigation);
+        ui.drawBootAnimation(25, "Initializing Touchpad");
         navigation::setup();
 
-        bootProgress(BootState::WiFi);
-        assert(esp32_wifi::setup([]() { bootProgress(BootState::SmartConfig); }) && "WiFi failed to initialize");
-
-        bootProgress(BootState::NTP);
+        ui.drawBootAnimation(35, "Connecting WiFi");
+        esp32_wifi::setup([]() { ui.drawBootAnimation(40, "Running SmartConfig"); });
         AC.tz.load();
         esp32_wifi::setupNTP([](struct timeval *) { rtc::adjustTimeFromInternalRTC(); }, ((String) AC.tz).c_str());
 
-        bootProgress(BootState::Webserver);
+        ui.drawBootAnimation(45, "Initializing Webserver");
         webserver::setup();
 
-        bootProgress(BootState::LightSensor);
+        ui.drawBootAnimation(50, "Initializing Light Sensor");
         assert(AC.lightSensor.setup() && "Light sensor failed to initialize");
 
-        bootProgress(BootState::LEDC);
+        ui.drawBootAnimation(55, "Initializing Main Light");
+        AC.mainLight.setup();
+
+        ui.drawBootAnimation(65, "Initializing Indicator Light");
         AC.indicatorLight.setup();
 
-        bootProgress(BootState::Player);
+        ui.drawBootAnimation(70, "Initializing DFPlayer");
         assert(AC.player.setup() && "Player failed to initialize");
 
+        ui.drawBootAnimation(75, "Loading sounds");
         AC.sounds = Sound::loadSounds(JSON_SOUNDS_FILE_NAME);
 
+        ui.drawBootAnimation(85, "Alarms");
         setupAlarm(AC.alarm1);
         setupAlarm(AC.alarm2);
         setAlarm(AC.alarm1, AC.rtc);
         setAlarm(AC.alarm2, AC.rtc);
 
-        bootProgress(BootState::Done);
+        ui.drawBootAnimation(90, "Setting UI Frames");
+        ui.setFrames(
+                UIDisplay::Frame{FRAME_CALLBACK(home), uiHome}, // 0
+                UIDisplay::Frame{FRAME_CALLBACK(alarm), uiAlarm}, // 1
+                UIDisplay::Frame{FRAME_CALLBACK(snoozeAlarm), uiAlarmSnooze}, // 2
+                UIDisplay::Frame{FRAME_CALLBACK(defuseAlarm), uiAlarmDefuse}, // 3
+                UIDisplay::Frame{FRAME_CALLBACK(overview), uiOverview}, // 4
+                UIDisplay::Frame{FRAME_CALLBACK(settings), uiSettings}, // 5
+                UIDisplay::Frame{FRAME_CALLBACK(alarmMenu), uiAlarmMenu}, // 6
+                UIDisplay::Frame{FRAME_CALLBACK(alarmTime), uiAlarmTime}, // 7
+                UIDisplay::Frame{FRAME_CALLBACK(alarmSound), uiAlarmSound}, // 8
+                UIDisplay::Frame{FRAME_CALLBACK(playerMenu), uiPlayerMenu}, // 9
+                UIDisplay::Frame{FRAME_CALLBACK(playerVolume), uiPlayerVolume}, // 10
+                UIDisplay::Frame{FRAME_CALLBACK(playerPlay), uiPlayerPlay}, // 11
+                UIDisplay::Frame{FRAME_CALLBACK(playerSounds), uiPlayerSounds}, // 12
+                UIDisplay::Frame{FRAME_CALLBACK(lightDuration), uiLightDuration}, // 13
+                UIDisplay::Frame{FRAME_CALLBACK(wifiMenu), uiWiFiMenu}, // 14
+                UIDisplay::Frame{FRAME_CALLBACK(smartConfig), uiSmartConfig}, // 15
+                UIDisplay::Frame{FRAME_CALLBACK(info), uiInfo} // 16
+        );
+
+        ui.drawBootAnimation(95, "Boot finished");
+        ui.drawBootAnimation(100, "Boot finished");
     }
 
     /**
@@ -91,104 +106,38 @@ namespace AlarmClock {
     void loop() {
         static auto &matrix = AC.matrix;
         static auto &lightLevel = AC.lightLevel;
-        static auto &mainLight = AC.mainLight;
         static bool matrixIlluminate{false};
-        static ESP32_Timer matrixScrollTimer{
-                "Matrix Scroll Timer",
-                2000,
-                false,
-                []() { matrix.scrollToStart(); }
-        };
-        static ESP32_Timer matrixIlluminateTimer{
+        static const ESP32_Timer matrixIlluminateTimer{
                 "Matrix Illuminate Timer",
                 5000,
                 false,
                 []() { matrixIlluminate = false; }
         };
-
-        matrix.loop();
-
-        // alarm handler
-        if (AC.anyAlarmTriggered) {
-            alarmHandler();
-            AC.anyAlarmTriggered = false;
-        }
-
         // callback to illuminate the matrix
-        auto illuminateMatrix = []() {
+        static const auto illuminateMatrix = []() {
             matrixIlluminate = true;
             matrixIlluminateTimer.start();
         };
 
+        // alarm handle
+        handleAlarms();
+
+        matrix.loop();
+
+        if (lightLevel < 1e-3 && !matrixIlluminate && navigation::read() != navigation::Direction::None) {
+            illuminateMatrix();
+        } else {
+            // if the ui is animating, don't do anything else
+            if (!AC.ui.loop()) return;
+        }
+
         // handle light sensor and matrix illumination
         if (AC.lightSensor.tryReading()) {
             auto value = AC.lightSensor.getValue();
-            if (lightLevel != 0 && value == 0) illuminateMatrix();
+            if (lightLevel > 1e-3 && value < 1e-3) illuminateMatrix();
             lightLevel = value;
             matrix.setBrightness((uint8_t) (0.1005 * lightLevel - 0.05));
-            matrix.shutdown(lightLevel == 0 && !matrixIlluminate && !mainLight.getDuty());
-        }
-
-        // TODO: implement settings mode
-        auto insideSettings = false;
-
-        // handle navigation actions
-        auto navDir = navigation::read();
-        if (!matrixIlluminate && navDir != navigation::Direction::None && lightLevel < 1e-5) {
-            illuminateMatrix();
-        } else if (insideSettings) {
-            // TODO: implement UI navigation
-        } else {
-            switch (navDir) {
-                case navigation::Direction::Center:
-                    if (AC.alarm1.state == AlarmState::PLAYING || AC.alarm2.state == AlarmState::PLAYING) {
-                        // TODO: implement snooze time setting
-                        // TODO: implement snooze ui
-                        if (AC.alarm1.state == AlarmState::PLAYING) {
-                            AC.alarm1.state = AlarmState::SNOOZE;
-                            snoozeAlarm(AC.alarm1, AC.rtc, 5);
-                        }
-                        if (AC.alarm2.state == AlarmState::PLAYING) {
-                            AC.alarm2.state = AlarmState::SNOOZE;
-                            snoozeAlarm(AC.alarm2, AC.rtc, 5);
-                        }
-                        AC.player.stop();
-                        AC.indicatorLight.setDuty(AC.indicatorLight.getMaxDuty() / 3);
-                    }
-                    else if (AC.alarm1.state == AlarmState::SNOOZE || AC.alarm2.state == AlarmState::SNOOZE) {
-                        if (AC.alarm1.state == AlarmState::SNOOZE) {
-                            AC.alarm1.state = AlarmState::OFF;
-                            if ((uint8_t) AC.alarm1.repeat) setAlarm(AC.alarm1, AC.rtc);
-                            else disableAlarm(AC.alarm1, AC.rtc);
-                        }
-                        if (AC.alarm2.state == AlarmState::SNOOZE) {
-                            AC.alarm2.state = AlarmState::OFF;
-                            if ((uint8_t) AC.alarm2.repeat) setAlarm(AC.alarm2, AC.rtc);
-                            else disableAlarm(AC.alarm2, AC.rtc);
-                        }
-                        AC.indicatorLight.toggleOff();
-                    }
-                    break;
-                case navigation::Direction::Left:
-                    matrix.scrollPrev();
-                    matrixScrollTimer.start();
-                    break;
-                case navigation::Direction::Right:
-                    matrix.scrollNext();
-                    matrixScrollTimer.start();
-                    break;
-                case navigation::Direction::Up:
-                    mainLight.incrDuty();
-                    if (!mainLight.getDuty()) illuminateMatrix();
-                    break;
-                case navigation::Direction::Down:
-                    mainLight.decrDuty();
-                    if (!mainLight.getDuty()) illuminateMatrix();
-                    break;
-                case navigation::Direction::None:
-                    // do nothing
-                    break;
-            }
+            matrix.shutdown(!AC.uiActive && lightLevel == 0 && !matrixIlluminate && !AC.mainLight.getDuty());
         }
     }
 

@@ -10,6 +10,7 @@
     "ESP32 Simple Timer": "1.0.0",
     "ESP32 Touchpad": "1.0.0",
     "MD Parola Matrix32x8": "1.0.0",
+    "User Interface": "1.0.0",
     "adafruit/Adafruit BusIO": "1.14.4",
     "adafruit/RTClib": "2.1.1",
     "dfrobot/DFRobotDFPlayerMini": "1.0.6",

@@ -41,7 +41,9 @@ constexpr char c_bell(bool filled = true) { return filled ? bellFilled : bellOut
  */
 struct Bell {
     bool filled;
+
     explicit Bell(bool filled = true) : filled(filled) {}
+
     explicit constexpr operator char() const { return c_bell(filled); }
 };
 

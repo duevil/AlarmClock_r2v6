@@ -77,6 +77,7 @@ public:
     // disable copy constructor and assignment operator
 
     ESP32_Timer(const ESP32_Timer &o) = delete;
+
     ESP32_Timer &operator=(const ESP32_Timer &o) = delete;
 
 private:

@@ -21,7 +21,7 @@ private:
     AveragedValue<float, READINGS> value{};
     float threshold{};
 
-     void touchRead() {
+    void touchRead() {
         float val;
         while ((val = ::touchRead(pin)) == 0);
         value = val;
@@ -53,6 +53,7 @@ public:
     }
 
     Touchpad(const Touchpad &other) = delete;
+
     Touchpad &operator=(const Touchpad &other) = delete;
 
 };
